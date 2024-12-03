@@ -2,90 +2,71 @@ import React, { useState } from 'react';
 import PlaceholderMap from './PlaceholderMap';
 import '../styles/DeliveryPlanner.css';
 
-
 const DeliveryPlanner = () => {
-    const [requests, setRequests] = useState([]);
-    const [currentRequest, setCurrentRequest] = useState({
-        warehouse: null,
-        pickup: null,
-        delivery: null,
-    });
-    const [selectionStep, setSelectionStep] = useState(null); // null, "warehouse", "pickup", "delivery"
-    const [selectedRequestIndex, setSelectedRequestIndex] = useState(null); // For highlighting
-    const [promptMessage, setPromptMessage] = useState(''); // For user prompts
+  const [requests, setRequests] = useState([]);
+  const [currentRequest, setCurrentRequest] = useState({
+    warehouse: null,
+    pickup: null,
+    delivery: null,
+  });
+  const [selectionStep, setSelectionStep] = useState(null); // 'warehouse', 'pickup', 'delivery'
+  const [highlightNodes, setHighlightNodes] = useState(null); // For node highlighting
 
-    const nodes = [
-        { id: 'A', lat: 0, long: 0 },
-        { id: 'B', lat: 1, long: 1 },
-        { id: 'C', lat: 2, long: 2 },
-    ]; // Placeholder nodes
+  const nodes = [
+    { id: 1, lat: 48.8566, lng: 2.3522 },
+    { id: 2, lat: 48.864716, lng: 2.349014 },
+    { id: 3, lat: 48.860611, lng: 2.337644 },
+  ]; // Example nodes
 
-    const handleNodeClick = (node) => {
-        if (!selectionStep) return;
+  const handleNodeClick = (node) => {
+    if (!selectionStep) return;
 
-        if (selectionStep === 'warehouse') {
-        setCurrentRequest({ ...currentRequest, warehouse: node.id });
-        setSelectionStep('pickup');
-        setPromptMessage('Choose a pickup point');
-        } else if (selectionStep === 'pickup') {
-        setCurrentRequest({ ...currentRequest, pickup: node.id });
-        setSelectionStep('delivery');
-        setPromptMessage('Choose a delivery point');
-        } else if (selectionStep === 'delivery') {
-        setCurrentRequest({ ...currentRequest, delivery: node.id });
-        setSelectionStep(null); // End selection
-        setRequests([...requests, { ...currentRequest, delivery: node.id }]);
-        setCurrentRequest({ warehouse: null, pickup: null, delivery: null });
-        setPromptMessage(''); // Clear prompt
-        }
-    };
+    if (selectionStep === 'warehouse') {
+      setCurrentRequest({ ...currentRequest, warehouse: node.id });
+      setSelectionStep('pickup');
+      setHighlightNodes({ warehouse: node.id });
+    } else if (selectionStep === 'pickup') {
+      setCurrentRequest({ ...currentRequest, pickup: node.id });
+      setSelectionStep('delivery');
+      setHighlightNodes({ ...highlightNodes, pickup: node.id });
+    } else if (selectionStep === 'delivery') {
+      setCurrentRequest({ ...currentRequest, delivery: node.id });
+      setRequests([...requests, { ...currentRequest, delivery: node.id }]);
+      setSelectionStep(null);
+      setHighlightNodes(null);
+      setCurrentRequest({ warehouse: null, pickup: null, delivery: null });
+    }
+  };
 
-    const startNewRequest = () => {
-        setSelectionStep('warehouse');
-        setPromptMessage('Choose a warehouse');
-        setCurrentRequest({ warehouse: null, pickup: null, delivery: null });
-        setSelectedRequestIndex(null); // Clear selected request
-    };
+  const startNewRequest = () => {
+    setSelectionStep('warehouse');
+    setHighlightNodes(null);
+  };
 
-    const handleRequestClick = (index) => {
-        // Toggle selection of a request
-        if (selectedRequestIndex === index) {
-        setSelectedRequestIndex(null); // Unselect if already selected
-        } else {
-        setSelectedRequestIndex(index);
-        }
-    };
+  return (
+    <div className="delivery-planner" style={{ display: 'flex', height: '100vh' }}>
+      <div className="map-container" style={{ flex: 2, borderRight: '1px solid #ddd' }}>
+        <PlaceholderMap
+          nodes={nodes}
+          onNodeClick={handleNodeClick}
+          highlightNodes={highlightNodes}
+        />
+      </div>
+      <div className="planner-container" style={{ flex: 1, padding: '20px', background: '#f9f9f9' }}>
+        <h3>Delivery Planner</h3>
+        <button onClick={startNewRequest} style={{ marginBottom: '20px' }}>
+          + Start New Request
+        </button>
+        <ul>
+          {requests.map((req, index) => (
+            <li key={index}>
+              {`Warehouse: ${req.warehouse}, Pickup: ${req.pickup}, Delivery: ${req.delivery}`}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
 
-    return (
-        <div className="delivery-planner" style={{ display: 'flex', height: '100vh' }}>
-        <div className="map-container" style={{ flex: 2, borderRight: '1px solid black' }}>
-            <PlaceholderMap
-            nodes={nodes}
-            onNodeClick={handleNodeClick}
-            highlightNodes={selectedRequestIndex !== null ? requests[selectedRequestIndex] : null}
-            />
-        </div>
-        <div className="requests-container" style={{ flex: 1, padding: '10px' }}>
-            <h3>Delivery Requests</h3>
-            <ul>
-            {requests.map((req, index) => (
-                <li
-                key={index}
-                onClick={() => handleRequestClick(index)}
-                style={{
-                    cursor: 'pointer',
-                    backgroundColor: selectedRequestIndex === index ? '#e0e0e0' : 'transparent',
-                }}
-                >
-                {`Warehouse: ${req.warehouse}, Pickup: ${req.pickup}, Delivery: ${req.delivery}`}
-                </li>
-            ))}
-            </ul>
-            <button onClick={startNewRequest}>+ Create New Request</button>
-            <p style={{ marginTop: '20px', fontWeight: 'bold' }}>{promptMessage}</p>
-        </div>
-        </div>
-    );
-    };
-
-    export default DeliveryPlanner;
+export default DeliveryPlanner;

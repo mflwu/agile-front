@@ -2,6 +2,7 @@
 import React from 'react';
 import DeliveryPlanner from './components/DeliveryPlanner';
 import './styles/App.css';
+import 'leaflet/dist/leaflet.css';
 
 function App() {
   return (
