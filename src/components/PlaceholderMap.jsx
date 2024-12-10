@@ -20,6 +20,7 @@ const createIcon = (color) => {
 
 const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
 	const center = [45.75465, 4.8674865]; // Center the map on Lyon
+	// Check if intersections is an array and not empty
 	if (intersections.length === 0) {
 		return (
 			<div
