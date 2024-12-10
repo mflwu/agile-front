@@ -1,7 +1,6 @@
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import '../styles/PlaceholderMap.css';
 
 // Create custom icons for the markers
 const createIcon = (color) => {
@@ -21,7 +20,7 @@ const createIcon = (color) => {
 
 
 const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
-  const center = [45.764043, 4.835659]; // Center the map on Lyon
+  const center = [45.75465, 4.8674865]; // Center the map on Lyon
   console.log('Center:', center);
   console.log('Intersections:', intersections);
   // Check if intersections is an array and not empty
@@ -36,7 +35,7 @@ const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
   return (
     <MapContainer
       center={center}
-      zoom={13}
+      zoom={16}
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer
