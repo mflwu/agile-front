@@ -16,7 +16,7 @@ const createIcon = (color) => {
 };
 
 const PlaceholderMap = ({ nodes, onNodeClick, highlightNodes }) => {
-  const center = [48.8566, 2.3522]; // Center of the map
+  const center = [45.764043, 4.835659]; // Latitude and Longitude of Lyon
 
   const getMarkerIcon = (node) => {
     if (highlightNodes) {
