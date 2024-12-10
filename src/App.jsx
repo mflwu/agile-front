@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DeliveryPlanner from './components/DeliveryPlanner';
 import PlaceholderMap from './components/PlaceholderMap';
 import './styles/App.css';
@@ -12,6 +12,24 @@ function App() {
     delivery: null,
   });
   const [selectionStep, setSelectionStep] = useState(null); // 'warehouse', 'pickup', 'delivery'
+  const [intersections, setIntersections] = useState([]); // Store intersections directly
+
+  // Fetch intersections from backend
+  useEffect(() => {
+    fetch('http://localhost:8080/city-map/loadmap')
+      .then((response) => {
+        if (!response.ok) throw new Error('Failed to load city map');
+        return response.json();
+      })
+      .then((data) => {
+        // Set intersections from response
+        setIntersections(data.intersections || []);
+      })
+      .catch((error) => {
+        console.error('Error fetching city map:', error);
+        setIntersections([]); // Fallback to empty list
+      });
+  }, []);
 
   const handleNodeClick = (node) => {
     if (!selectionStep) return;
@@ -43,17 +61,8 @@ function App() {
     <div className="App">
       <div className="map-section">
         <PlaceholderMap
-          nodes={[
-            { id: 1, lat: 45.764043, lng: 4.835659 }, // Lyon Center
-            { id: 2, lat: 45.750000, lng: 4.850000 }, // Example point in Lyon
-            { id: 3, lat: 45.770000, lng: 4.820000 }, // Another point in Lyon
-          ]}
-          onNodeClick={handleNodeClick}
-          highlightNodes={{
-            warehouse: currentRequest.warehouse?.id,
-            pickup: currentRequest.pickup?.id,
-            delivery: currentRequest.delivery?.id,
-          }}
+          intersections={intersections} // Pass intersections directly
+          onNodeClick={(node) => console.log('Node clicked:', node)}
         />
       </div>
       <div className="planner-section">

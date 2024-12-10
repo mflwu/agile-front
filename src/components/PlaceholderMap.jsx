@@ -1,59 +1,69 @@
-import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
+import React from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
 
+// Create custom icons for the markers
 const createIcon = (color) => {
-	return new L.Icon({
-		iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
-		shadowUrl:
-			"https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.4/images/marker-shadow.png",
-		iconSize: [25, 41],
-		iconAnchor: [12, 41],
-		popupAnchor: [1, -34],
-		shadowSize: [41, 41],
-	});
+  return new L.DivIcon({
+    className: 'custom-marker', // Add a custom class
+    html: `<div style="
+      background-color: ${color};
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    "></div>`, // Small circle as the marker
+    iconSize: [10, 10], // Size of the circle
+    iconAnchor: [5, 5], // Center the marker on its position
+  });
 };
 
-const PlaceholderMap = ({ nodes, onNodeClick, highlightNodes }) => {
-	const center = [45.764043, 4.835659]; // Lyon
 
-	const getMarkerIcon = (node) => {
-		if (highlightNodes) {
-			if (highlightNodes.warehouse === node.id) return createIcon("green");
-			if (highlightNodes.pickup === node.id) return createIcon("blue");
-			if (highlightNodes.delivery === node.id) return createIcon("red");
-		}
-		return createIcon("grey");
-	};
+const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
+  const center = [45.75465, 4.8674865]; // Center the map on Lyon
+  console.log('Center:', center);
+  console.log('Intersections:', intersections);
+  // Check if intersections is an array and not empty
+  if (intersections.length === 0) {
+    return (
+      <div className="map-placeholder" style={{ height: '100%', textAlign: 'center', paddingTop: '20px' }}>
+        <p>Loading map data...</p>
+      </div>
+    );
+  }
 
-	return (
-		<MapContainer
-			center={center}
-			zoom={13}
-			style={{ height: "100%", width: "100%" }}
-		>
-			<TileLayer
-				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-			/>
-			{nodes.map((node) => (
-				<Marker
-					key={node.id}
-					position={[node.lat, node.lng]}
-					icon={getMarkerIcon(node)}
-					eventHandlers={{
-						click: () => onNodeClick(node),
-					}}
-				>
-					<Popup>
-						{`Node ${node.id}`}
-						<br />
-						{`Lat: ${node.lat}, Lng: ${node.lng}`}
-					</Popup>
-				</Marker>
-			))}
-		</MapContainer>
-	);
+  return (
+    <MapContainer
+      center={center}
+      zoom={16}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      />
+
+      {/* Render intersections as markers */}
+      {Object.values(intersections).map((node) => (
+          <Marker
+            key={node.id}
+            position={[node.latitude, node.longitude]}
+            icon={createIcon('blue')}
+            eventHandlers={{
+              click: () => onNodeClick(node),
+            }}
+          >
+          <Popup>
+            <strong>Node ID:</strong> {node.id}
+            <br />
+            <strong>Latitude:</strong> {node.latitude}
+            <br />
+            <strong>Longitude:</strong> {node.longitude}
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
+  );
 };
 
 export default PlaceholderMap;
