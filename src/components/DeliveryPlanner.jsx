@@ -45,13 +45,6 @@ const DeliveryPlanner = () => {
 
   return (
     <div className="delivery-planner" style={{ display: 'flex', height: '100vh' }}>
-      <div className="map-container" style={{ flex: 2, borderRight: '1px solid #ddd' }}>
-        <PlaceholderMap
-          nodes={nodes}
-          onNodeClick={handleNodeClick}
-          highlightNodes={highlightNodes}
-        />
-      </div>
       <div className="planner-container" style={{ flex: 1, padding: '20px', background: '#f9f9f9' }}>
         <h3>Delivery Planner</h3>
         <button onClick={startNewRequest} style={{ marginBottom: '20px' }}>
