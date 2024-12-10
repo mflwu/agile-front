@@ -9,7 +9,7 @@
 .map-section {
 	grid-column: 1; /* Map occupies the first column */
 	grid-row: 1; /* Occupies the full height */
-	height: 100%; /* Ensures the map stretches properly */
+	height: 100vh; /* Ensures the map stretches properly */
 }
 
 .planner-section {
@@ -18,5 +18,5 @@
 	background-color: #edecec;
 	padding: 20px;
 	overflow-y: auto; /* Allow scrolling for content overflow */
-	height: 100%; /* Ensure full height */
+	height: 100vh; /* Ensure full height */
 }

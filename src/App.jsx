@@ -10,6 +10,7 @@ function App() {
 		warehouse: null,
 		pickup: null,
 		delivery: null,
+		courier: null,
 	});
 	const [selectionStep, setSelectionStep] = useState(null); // 'warehouse', 'pickup', 'delivery'
 	const [intersections, setIntersections] = useState([]); // Store intersections directly
@@ -22,9 +23,8 @@ function App() {
 				return response.json();
 			})
 			.then((data) => {
-				const croppedIntersections = (data.intersections || []); 
-				setIntersections(croppedIntersections);
-				console.log("Intersections loaded:", croppedIntersections);
+				// Set intersections from response
+				setIntersections(data.intersections || []);
 			})
 			.catch((error) => {
 				console.error("Error fetching city map:", error);
@@ -46,11 +46,11 @@ function App() {
 		} else if (selectionStep === "delivery") {
 			updatedRequest.delivery = node;
 			setRequests([...requests, updatedRequest]);
-			setSelectionStep(null); // End the selection
+			setSelectionStep(null);
 			setCurrentRequest({ warehouse: null, pickup: null, delivery: null }); // Reset for the next request
 		}
 
-		setCurrentRequest(updatedRequest); // Update the current request
+		setCurrentRequest(updatedRequest);
 	};
 
 	const startNewRequest = () => {
@@ -62,8 +62,8 @@ function App() {
 		<div className="App">
 			<div className="map-section">
 				<PlaceholderMap
-					intersections={intersections}
-					onNodeClick={handleNodeClick} // Pass click handler to map
+					intersections={intersections} // Pass intersections directly
+					onNodeClick={handleNodeClick}
 				/>
 			</div>
 			<div className="planner-section">
@@ -71,6 +71,7 @@ function App() {
 					requests={requests}
 					startNewRequest={startNewRequest}
 					selectionStep={selectionStep}
+					setSelectionStep={setSelectionStep}
 				/>
 			</div>
 		</div>
