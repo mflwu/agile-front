@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import '../styles/PlaceholderMap.css';
 
-// Custom marker icons
 const createIcon = (color) => {
   return new L.Icon({
     iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
@@ -16,7 +15,7 @@ const createIcon = (color) => {
 };
 
 const PlaceholderMap = ({ nodes, onNodeClick, highlightNodes }) => {
-  const center = [45.764043, 4.835659]; // Latitude and Longitude of Lyon
+  const center = [45.764043, 4.835659]; // Lyon
 
   const getMarkerIcon = (node) => {
     if (highlightNodes) {
@@ -24,7 +23,7 @@ const PlaceholderMap = ({ nodes, onNodeClick, highlightNodes }) => {
       if (highlightNodes.pickup === node.id) return createIcon('blue');
       if (highlightNodes.delivery === node.id) return createIcon('red');
     }
-    return createIcon('grey'); // Default marker
+    return createIcon('grey');
   };
 
   return (
@@ -32,7 +31,6 @@ const PlaceholderMap = ({ nodes, onNodeClick, highlightNodes }) => {
       center={center}
       zoom={13}
       style={{ height: '100%', width: '100%' }}
-      className="leaflet-container"
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -48,9 +46,9 @@ const PlaceholderMap = ({ nodes, onNodeClick, highlightNodes }) => {
           }}
         >
           <Popup>
-            Node {node.id}
+            {`Node ${node.id}`}
             <br />
-            Lat: {node.lat}, Lng: {node.lng}
+            {`Lat: ${node.lat}, Lng: ${node.lng}`}
           </Popup>
         </Marker>
       ))}
