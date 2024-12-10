@@ -12,7 +12,7 @@ function App() {
 		delivery: null,
 		courier: null,
 	});
-	const [selectionStep, setSelectionStep] = useState(null); // 'warehouse', 'pickup', 'delivery'
+	const [selectionStep, setSelectionStep] = useState("");
 	const [intersections, setIntersections] = useState([]); // Store intersections directly
 
 	// Fetch intersections from backend
@@ -54,8 +54,13 @@ function App() {
 	};
 
 	const startNewRequest = () => {
-		setSelectionStep("warehouse");
-		setCurrentRequest({ warehouse: null, pickup: null, delivery: null });
+		setSelectionStep("courier");
+		setCurrentRequest({
+			courier: null,
+			warehouse: null,
+			pickup: null,
+			delivery: null,
+		});
 	};
 
 	return (
