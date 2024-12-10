@@ -4,193 +4,158 @@ import {
 	FaTruckPickup,
 	FaShippingFast,
 	FaPlus,
+	FaUser,
 } from "react-icons/fa";
 
-// Entrepôts prédéfinis
-const warehouses = [
-	{ id: 1, name: "Warehouse A", lat: 48.8566, lng: 2.3522 },
-	{ id: 2, name: "Warehouse B", lat: 40.7128, lng: -74.006 },
-];
+const DeliveryPlanner = ({
+	requests,
+	startNewRequest,
+	selectionStep,
+	setSelectionStep,
+}) => {
+	const [selectedCourier, setSelectedCourier] = useState(null);
+	const couriers = [
+		{ id: 1, name: "John Doe" },
+		{ id: 2, name: "Jane Smith" },
+		{ id: 3, name: "Mike Johnson" },
+	];
 
-// Livreurs prédéfinis
-const deliverers = [
-	{ id: 1, name: "John Doe" },
-	{ id: 2, name: "Jane Smith" },
-];
-
-const DeliveryPlanner = ({ requests, setRequests }) => {
-	const [selectionStep, setSelectionStep] = useState(null);
-	const [newRequest, setNewRequest] = useState({
-		warehouse: null,
-		deliverer: null,
-		pickup: null,
-		deliveries: [],
-	});
-
-	const startNewRequest = () => {
-		setNewRequest({
-			warehouse: null,
-			deliverer: null,
-			pickup: null,
-			deliveries: [],
-		});
+	const handleCourierSelect = (courier) => {
+		setSelectedCourier(courier);
 		setSelectionStep("warehouse");
 	};
 
-	const handleWarehouseSelection = (id) => {
-		const warehouse = warehouses.find((wh) => wh.id === id);
-		setNewRequest((prev) => ({ ...prev, warehouse }));
-		setSelectionStep("deliverer");
-	};
-
-	const handleDelivererSelection = (id) => {
-		const deliverer = deliverers.find((del) => del.id === id);
-		setNewRequest((prev) => ({ ...prev, deliverer }));
-		setSelectionStep("pickup");
-	};
-
-	const handlePickupSelection = (lat, lng) => {
-		setNewRequest((prev) => ({ ...prev, pickup: { lat, lng } }));
-		setSelectionStep("delivery");
-	};
-
-	const handleDeliverySelection = (lat, lng) => {
-		setNewRequest((prev) => ({
-			...prev,
-			deliveries: [...prev.deliveries, { lat, lng }],
-		}));
-	};
-
-	const completeRequest = () => {
-		setRequests((prev) => [...prev, newRequest]);
-		setSelectionStep(null);
-	};
-
 	const getStepMessage = () => {
-		switch (selectionStep) {
-			case "warehouse":
-				return "Select a warehouse.";
-			case "deliverer":
-				return "Select a deliverer.";
-			case "pickup":
-				return "Click on the map to select the pickup location.";
-			case "delivery":
-				return "Click on the map to select delivery locations.";
-			default:
-				return "Press the button to start creating a new delivery.";
-		}
+		if (selectionStep === "courier") return "Please select a courier.";
+		if (selectionStep === "warehouse")
+			return "Click on the map to select the warehouse.";
+		if (selectionStep === "pickup")
+			return "Click on the map to select the pickup location.";
+		if (selectionStep === "delivery")
+			return "Click on the map to select the delivery location.";
+		return "Press the button to start creating a new delivery.";
+	};
+
+	const startNewRequestWithCourier = () => {
+		setSelectedCourier(null);
+		setSelectionStep("courier");
+		startNewRequest();
 	};
 
 	return (
-		<div style={{ padding: "1rem", maxWidth: "600px", margin: "0 auto" }}>
-			{/* Barre de navigation */}
+		<div
+			style={{
+				padding: "1rem",
+				color: "#000000",
+				maxWidth: "600px",
+				margin: "0 auto",
+			}}
+		>
+			{/* Barre de navigation avec icônes */}
 			<div
 				style={{
 					display: "flex",
 					justifyContent: "space-between",
 					alignItems: "center",
+					backgroundColor: "#f0f0f0",
+					padding: "1rem",
+					borderRadius: "0.75rem",
 					marginBottom: "1rem",
 				}}
 			>
-				<FaWarehouse size={30} color="#4CAF50" />
-				<FaTruckPickup size={30} color="#FF9800" />
-				<FaShippingFast size={30} color="#2196F3" />
+				<FaUser size={30} color="#9C27B0" title="Courier" />
+				<FaWarehouse size={30} color="#4CAF50" title="Warehouse" />
+				<FaTruckPickup size={30} color="#FF9800" title="Pickup" />
+				<FaShippingFast size={30} color="#2196F3" title="Delivery" />
 				<button
-					onClick={startNewRequest}
+					onClick={startNewRequestWithCourier}
 					style={{
 						backgroundColor: "#4CAF50",
 						color: "white",
 						padding: "0.5rem 1rem",
+						fontSize: "1rem",
+						border: "none",
 						borderRadius: "0.5rem",
+						cursor: "pointer",
+						display: "flex",
+						alignItems: "center",
+						gap: "0.5rem",
 					}}
 				>
-					<FaPlus /> New Request
+					<FaPlus />
+					New Request
 				</button>
 			</div>
 
-			<p style={{ textAlign: "center", marginBottom: "1rem" }}>
+			{/* Message d'instruction */}
+			<p
+				style={{ textAlign: "center", fontSize: "1rem", marginBottom: "1rem" }}
+			>
 				{getStepMessage()}
 			</p>
 
-			{/* Sélection du warehouse */}
-			{selectionStep === "warehouse" && (
-				<div>
-					<h3>Select Warehouse</h3>
-					{warehouses.map((wh) => (
-						<button
-							key={wh.id}
-							onClick={() => handleWarehouseSelection(wh.id)}
-							style={{ margin: "0.5rem" }}
-						>
-							{wh.name}
-						</button>
-					))}
-				</div>
-			)}
-
 			{/* Sélection du livreur */}
-			{selectionStep === "deliverer" && (
-				<div>
-					<h3>Select Deliverer</h3>
-					{deliverers.map((del) => (
+			{selectionStep === "courier" && (
+				<div
+					style={{
+						display: "flex",
+						flexDirection: "column",
+						gap: "0.5rem",
+						marginBottom: "1rem",
+					}}
+				>
+					<h3>Select a Courier:</h3>
+					{couriers.map((courier) => (
 						<button
-							key={del.id}
-							onClick={() => handleDelivererSelection(del.id)}
-							style={{ margin: "0.5rem" }}
+							key={courier.id}
+							onClick={() => handleCourierSelect(courier)}
+							style={{
+								padding: "0.5rem 1rem",
+								backgroundColor:
+									selectedCourier?.id === courier.id ? "#4CAF50" : "#f0f0f0",
+								color: selectedCourier?.id === courier.id ? "white" : "black",
+								border: "1px solid #ccc",
+								borderRadius: "0.5rem",
+								cursor: "pointer",
+							}}
 						>
-							{del.name}
+							{courier.name}
 						</button>
 					))}
-				</div>
-			)}
-
-			{/* Bouton pour finaliser la requête */}
-			{selectionStep === "delivery" && (
-				<div>
-					<button
-						onClick={completeRequest}
-						style={{
-							marginTop: "1rem",
-							backgroundColor: "#2196F3",
-							color: "white",
-							padding: "0.5rem 1rem",
-							borderRadius: "0.5rem",
-						}}
-					>
-						Complete Request
-					</button>
 				</div>
 			)}
 
 			{/* Liste des requêtes */}
-			<ul>
+			<ul style={{ listStyleType: "none", padding: 0 }}>
 				{requests.map((req, index) => (
 					<li
 						key={index}
 						style={{
-							border: "1px solid #ccc",
+							borderRadius: "0.75rem",
+							border: "2px solid #000000",
 							padding: "1rem",
-							margin: "0.5rem 0",
+							marginBottom: "0.5rem",
+							backgroundColor: "#f9f9f9",
+							fontSize: "0.9rem",
 						}}
 					>
-						<div>
-							<strong>Warehouse:</strong> {req.warehouse.name}
+						<div style={{ padding: "0.25rem" }}>
+							<FaUser size={15} color="#9C27B0" title="Courier" />
+							<strong>Courier:</strong> {req.courier?.name}
 						</div>
-						<div>
-							<strong>Deliverer:</strong> {req.deliverer.name}
+						<div style={{ padding: "0.25rem" }}>
+							<FaWarehouse size={15} color="#4CAF50" title="Warehouse" />
+							<strong>Warehouse:</strong> ({req.warehouse.lat},{" "}
+							{req.warehouse.lng})
 						</div>
-						<div>
+						<div style={{ padding: "0.25rem" }}>
+							<FaTruckPickup size={15} color="#FF9800" title="Pickup" />
 							<strong>Pickup:</strong> ({req.pickup.lat}, {req.pickup.lng})
 						</div>
-						<div>
-							<strong>Deliveries:</strong>
-							<ul>
-								{req.deliveries.map((delivery, i) => (
-									<li key={i}>
-										({delivery.lat}, {delivery.lng})
-									</li>
-								))}
-							</ul>
+						<div style={{ padding: "0.25rem" }}>
+							<FaShippingFast size={15} color="#2196F3" title="Delivery" />
+							<strong>Delivery:</strong> ({req.delivery.lat}, {req.delivery.lng}
+							)
 						</div>
 					</li>
 				))}
