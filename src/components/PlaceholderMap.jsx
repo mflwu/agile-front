@@ -2,35 +2,36 @@ import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 
-// Create custom icons for the markers
-const createIcon = (color) => {
+// Fonction pour créer des icônes personnalisés avec forme et couleur
+const createIcon = (shape, color, size = 15) => {
 	return new L.DivIcon({
-		className: "custom-marker", // Add a custom class
+		className: "custom-marker",
 		html: `<div style="
-      background-color: ${color};
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-    "></div>`, // Small circle as the marker
-		iconSize: [10, 10], // Size of the circle
-		iconAnchor: [5, 5], // Center the marker on its position
+			width: ${size}px;
+			height: ${size}px;
+			background-color: ${color};
+			clip-path: ${shape};
+			box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+		"></div>`,
+		iconSize: [size, size],
+		iconAnchor: [size / 2, size / 2],
 	});
 };
 
-const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
-	const center = [45.75465, 4.8674865]; // Center the map on Lyon
-	// Check if intersections is an array and not empty
-	if (intersections.length === 0) {
-		return (
-			<div
-				className="map-placeholder"
-				style={{ height: "100%", textAlign: "center", paddingTop: "20px" }}
-			>
-				<p>Loading map data...</p>
-			</div>
-		);
-	}
+// Formes SVG pour les marqueurs
+const shapes = {
+	square: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+	triangle: "polygon(50% 0%, 0% 100%, 100% 100%)",
+	circle: "circle(50% at 50% 50%)",
+};
+
+const PlaceholderMap = ({
+	intersections = [],
+	onNodeClick,
+	highlightedNodes,
+	requests,
+}) => {
+	const center = [45.75465, 4.8674865]; // Centre de la carte
 
 	return (
 		<MapContainer
@@ -43,12 +44,12 @@ const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
 				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			/>
 
-			{/* Render intersections as markers */}
+			{/* Afficher les intersections comme marqueurs noirs */}
 			{Object.values(intersections).map((node) => (
 				<Marker
 					key={node.id}
 					position={[node.latitude, node.longitude]}
-					icon={createIcon("black")}
+					icon={createIcon(shapes.circle, "black")}
 					eventHandlers={{
 						click: () => onNodeClick(node),
 					}}
@@ -62,6 +63,53 @@ const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
 					</Popup>
 				</Marker>
 			))}
+
+			{/* Afficher les requêtes avec des couleurs et des formes différentes */}
+			{requests.map((request, index) => {
+				// Générer une couleur unique pour chaque requête
+				const colors = ["red", "blue", "green", "purple", "orange"];
+				const color = colors[index % colors.length];
+
+				return (
+					<React.Fragment key={index}>
+						{/* Warehouse - Carré */}
+						{request.warehouse && (
+							<Marker
+								position={[
+									request.warehouse.latitude,
+									request.warehouse.longitude,
+								]}
+								icon={createIcon(shapes.square, color)}
+							>
+								<Popup>Warehouse - {request.warehouse.id}</Popup>
+							</Marker>
+						)}
+
+						{/* Pickup - Triangle */}
+						{request.pickup && (
+							<Marker
+								position={[request.pickup.latitude, request.pickup.longitude]}
+								icon={createIcon(shapes.triangle, color, 25)}
+							>
+								<Popup>Pickup - {request.pickup.id}</Popup>
+							</Marker>
+						)}
+
+						{/* Delivery - Rond */}
+						{request.delivery && (
+							<Marker
+								position={[
+									request.delivery.latitude,
+									request.delivery.longitude,
+								]}
+								icon={createIcon(shapes.circle, color)}
+							>
+								<Popup>Delivery - {request.delivery.id}</Popup>
+							</Marker>
+						)}
+					</React.Fragment>
+				);
+			})}
 		</MapContainer>
 	);
 };
