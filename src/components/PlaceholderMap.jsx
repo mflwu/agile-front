@@ -19,15 +19,18 @@ const createIcon = (color) => {
 };
 
 const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
-  const center = [45.75465, 4.8674865]; // Center the map on Lyon
-  // Check if intersections is an array and not empty
-  if (intersections.length === 0) {
-    return (
-      <div className="map-placeholder" style={{ height: '100%', textAlign: 'center', paddingTop: '20px' }}>
-        <p>Loading map data...</p>
-      </div>
-    );
-  }
+	const center = [45.75465, 4.8674865]; // Center the map on Lyon
+	// Check if intersections is an array and not empty
+	if (intersections.length === 0) {
+		return (
+			<div
+				className="map-placeholder"
+				style={{ height: "100%", textAlign: "center", paddingTop: "20px" }}
+			>
+				<p>Loading map data...</p>
+			</div>
+		);
+	}
 
 	return (
 		<MapContainer
