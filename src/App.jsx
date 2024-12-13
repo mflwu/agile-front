@@ -44,7 +44,7 @@ function App() {
 		fetchIntersections();
 	}, []);
 
-	const handleNodeClick = (node) => {
+	const handleNodeClick = async (node) => {
 		if (!selectionStep) return;
 
 		const updatedRequest = { ...currentRequest };
