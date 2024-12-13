@@ -10,6 +10,7 @@ import {
 const DeliveryPlanner = ({
 	requests,
 	startNewRequest,
+	setCurrentRequest,
 	selectionStep,
 	setSelectionStep,
 }) => {
@@ -19,11 +20,6 @@ const DeliveryPlanner = ({
 		{ id: 2, name: "Jane Smith" },
 		{ id: 3, name: "Mike Johnson" },
 	];
-
-	const handleCourierSelect = (courier) => {
-		setSelectedCourier(courier);
-		setSelectionStep("warehouse");
-	};
 
 	const getStepMessage = () => {
 		if (selectionStep === "courier") return "Please select a courier.";
@@ -40,6 +36,12 @@ const DeliveryPlanner = ({
 		setSelectedCourier(null);
 		setSelectionStep("courier");
 		startNewRequest();
+	};
+
+	const handleCourierSelect = (courier) => {
+		setSelectedCourier(courier);
+		setCurrentRequest((prevRequest) => ({ ...prevRequest, courier }));
+		setSelectionStep("warehouse");
 	};
 
 	return (
@@ -141,21 +143,22 @@ const DeliveryPlanner = ({
 					>
 						<div style={{ padding: "0.25rem" }}>
 							<FaUser size={15} color="#9C27B0" title="Courier" />
-							<strong>Courier:</strong> {req.courier?.name}
+							<strong>Courier:</strong> {req.courier.name}
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaWarehouse size={15} color="#4CAF50" title="Warehouse" />
-							<strong>Warehouse:</strong> ({req.warehouse.lat},{" "}
-							{req.warehouse.lng})
+							<strong>Warehouse:</strong> ({req.warehouse.latitude},{" "}
+							{req.warehouse.longitude})
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaTruckPickup size={15} color="#FF9800" title="Pickup" />
-							<strong>Pickup:</strong> ({req.pickup.lat}, {req.pickup.lng})
+							<strong>Pickup:</strong> ({req.pickup.latitude},{" "}
+							{req.pickup.longitude})
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaShippingFast size={15} color="#2196F3" title="Delivery" />
-							<strong>Delivery:</strong> ({req.delivery.lat}, {req.delivery.lng}
-							)
+							<strong>Delivery:</strong> ({req.delivery.latitude},{" "}
+							{req.delivery.longitude})
 						</div>
 					</li>
 				))}
