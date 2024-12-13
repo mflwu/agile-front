@@ -8,11 +8,12 @@ import {
 } from "react-icons/fa";
 
 const DeliveryPlanner = ({
-	requests,
-	startNewRequest,
-	setCurrentRequest,
+	startNewTour,
+	tours,
+	setCurrentTour,
 	selectionStep,
 	setSelectionStep,
+	finalizeTour,
 }) => {
 	const [selectedCourier, setSelectedCourier] = useState(null);
 	const couriers = [
@@ -22,26 +23,31 @@ const DeliveryPlanner = ({
 	];
 
 	const getStepMessage = () => {
-		if (selectionStep === "courier") return "Please select a courier.";
+		if (selectionStep === "courier")
+			return "Please select a courier for the new tour";
 		if (selectionStep === "warehouse")
-			return "Click on the map to select the warehouse.";
+			return "Click on the map to select the warehouse for the new tour.";
 		if (selectionStep === "pickup")
-			return "Click on the map to select the pickup location.";
+			return "Click on the map to select the pickup location for the new request.";
 		if (selectionStep === "delivery")
-			return "Click on the map to select the delivery location.";
-		return "Press the button to start creating a new delivery.";
+			return "Click on the map to select the delivery location for the new request.";
+		return "Press the button to start creating a new tour.";
 	};
 
-	const startNewRequestWithCourier = () => {
+	const startNewTourWithCourier = () => {
 		setSelectedCourier(null);
 		setSelectionStep("courier");
-		startNewRequest();
+		startNewTour();
 	};
 
 	const handleCourierSelect = (courier) => {
 		setSelectedCourier(courier);
-		setCurrentRequest((prevRequest) => ({ ...prevRequest, courier }));
+		setCurrentTour({ courier, requests: [] });
 		setSelectionStep("warehouse");
+	};
+
+	const endTour = () => {
+		finalizeTour();
 	};
 
 	return (
@@ -70,7 +76,7 @@ const DeliveryPlanner = ({
 				<FaTruckPickup size={30} color="#FF9800" title="Pickup" />
 				<FaShippingFast size={30} color="#2196F3" title="Delivery" />
 				<button
-					onClick={startNewRequestWithCourier}
+					onClick={startNewTourWithCourier}
 					style={{
 						backgroundColor: "#4CAF50",
 						color: "white",
@@ -85,8 +91,29 @@ const DeliveryPlanner = ({
 					}}
 				>
 					<FaPlus />
-					New Request
+					New Tour
 				</button>
+
+				{selectionStep == "pickup" && (
+					<button
+						onClick={endTour}
+						style={{
+							backgroundColor: "#4CAF50",
+							color: "white",
+							padding: "0.5rem 1rem",
+							fontSize: "1rem",
+							border: "none",
+							borderRadius: "0.5rem",
+							cursor: "pointer",
+							display: "flex",
+							alignItems: "center",
+							gap: "0.5rem",
+						}}
+					>
+						<FaPlus />
+						End tour
+					</button>
+				)}
 			</div>
 
 			{/* Message d'instruction */}
@@ -127,11 +154,11 @@ const DeliveryPlanner = ({
 				</div>
 			)}
 
-			{/* Liste des requêtes */}
+			{/* Liste des tours */}
 			<ul style={{ listStyleType: "none", padding: 0 }}>
-				{requests.map((req, index) => (
+				{tours.map((tour, indexTour) => (
 					<li
-						key={index}
+						key={indexTour}
 						style={{
 							borderRadius: "0.75rem",
 							border: "2px solid #000000",
@@ -143,23 +170,51 @@ const DeliveryPlanner = ({
 					>
 						<div style={{ padding: "0.25rem" }}>
 							<FaUser size={15} color="#9C27B0" title="Courier" />
-							<strong>Courier:</strong> {req.courier.name}
+							<strong>Courier:</strong> {tour.courier.name}
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaWarehouse size={15} color="#4CAF50" title="Warehouse" />
-							<strong>Warehouse:</strong> ({req.warehouse.latitude},{" "}
-							{req.warehouse.longitude})
+							<strong>Warehouse:</strong> ({tour.warehouse.latitude},{" "}
+							{tour.warehouse.longitude})
 						</div>
-						<div style={{ padding: "0.25rem" }}>
-							<FaTruckPickup size={15} color="#FF9800" title="Pickup" />
-							<strong>Pickup:</strong> ({req.pickup.latitude},{" "}
-							{req.pickup.longitude})
-						</div>
-						<div style={{ padding: "0.25rem" }}>
-							<FaShippingFast size={15} color="#2196F3" title="Delivery" />
-							<strong>Delivery:</strong> ({req.delivery.latitude},{" "}
-							{req.delivery.longitude})
-						</div>
+
+						{/* Liste des requêtes */}
+						<ul
+							style={{
+								listStyleType: "none",
+								paddingLeft: "1rem",
+								marginTop: "0.5rem",
+							}}
+						>
+							{tour.requests.map((req, indexReq) => (
+								<li
+									key={indexReq}
+									style={{
+										borderRadius: "0.75rem",
+										border: "2px solid #000000",
+										padding: "1rem",
+										marginBottom: "0.5rem",
+										backgroundColor: "#f9f9f9",
+										fontSize: "0.9rem",
+									}}
+								>
+									<div style={{ padding: "0.25rem" }}>
+										<FaTruckPickup size={15} color="#FF9800" title="Pickup" />
+										<strong>Pickup:</strong> ({req.pickup.latitude},{" "}
+										{req.pickup.longitude})
+									</div>
+									<div style={{ padding: "0.25rem" }}>
+										<FaShippingFast
+											size={15}
+											color="#2196F3"
+											title="Delivery"
+										/>
+										<strong>Delivery:</strong> ({req.delivery.latitude},{" "}
+										{req.delivery.longitude})
+									</div>
+								</li>
+							))}
+						</ul>
 					</li>
 				))}
 			</ul>

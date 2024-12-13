@@ -25,12 +25,7 @@ const shapes = {
 	circle: "circle(50% at 50% 50%)",
 };
 
-const PlaceholderMap = ({
-	intersections = [],
-	onNodeClick,
-	highlightedNodes,
-	requests,
-}) => {
+const PlaceholderMap = ({ intersections = [], onNodeClick, tours }) => {
 	const center = [45.75465, 4.8674865]; // Centre de la carte
 
 	return (
@@ -49,7 +44,7 @@ const PlaceholderMap = ({
 				<Marker
 					key={node.id}
 					position={[node.latitude, node.longitude]}
-					icon={createIcon(shapes.circle, "black")}
+					icon={createIcon(shapes.circle, "grey")}
 					eventHandlers={{
 						click: () => onNodeClick(node),
 					}}
@@ -65,48 +60,53 @@ const PlaceholderMap = ({
 			))}
 
 			{/* Afficher les requêtes avec des couleurs et des formes différentes */}
-			{requests.map((request, index) => {
+			{tours.map((tour, indexTour) => {
 				// Générer une couleur unique pour chaque requête
 				const colors = ["red", "blue", "green", "purple", "orange"];
-				const color = colors[index % colors.length];
+				const color = colors[indexTour % colors.length];
 
 				return (
-					<React.Fragment key={index}>
+					<React.Fragment key={indexTour}>
 						{/* Warehouse - Carré */}
-						{request.warehouse && (
+						{tour.warehouse && (
 							<Marker
-								position={[
-									request.warehouse.latitude,
-									request.warehouse.longitude,
-								]}
+								position={[tour.warehouse.latitude, tour.warehouse.longitude]}
 								icon={createIcon(shapes.square, color)}
 							>
-								<Popup>Warehouse - {request.warehouse.id}</Popup>
+								<Popup>Tour n°{indexTour} - Warehouse</Popup>
 							</Marker>
 						)}
 
-						{/* Pickup - Triangle */}
-						{request.pickup && (
-							<Marker
-								position={[request.pickup.latitude, request.pickup.longitude]}
-								icon={createIcon(shapes.triangle, color, 25)}
-							>
-								<Popup>Pickup - {request.pickup.id}</Popup>
-							</Marker>
-						)}
-
-						{/* Delivery - Rond */}
-						{request.delivery && (
-							<Marker
-								position={[
-									request.delivery.latitude,
-									request.delivery.longitude,
-								]}
-								icon={createIcon(shapes.circle, color)}
-							>
-								<Popup>Delivery - {request.delivery.id}</Popup>
-							</Marker>
-						)}
+						{tour.requests.map((request, indexRequest) => {
+							<React.Fragment key={`tour-${indexTour}-req-${indexRequest}`}>
+								{request.pickup && (
+									<Marker
+										position={[
+											request.pickup.latitude,
+											request.pickup.longitude,
+										]}
+										icon={createIcon(shapes.triangle, color, 20)}
+									>
+										<Popup>
+											Tour n°{indexTour} - Requête n°{indexRequest} Pickup
+										</Popup>
+									</Marker>
+								)}
+								{request.delivery && (
+									<Marker
+										position={[
+											request.delivery.latitude,
+											request.delivery.longitude,
+										]}
+										icon={createIcon(shapes.circle, color)}
+									>
+										<Popup>
+											Tour n°{indexTour} - Requête n°{indexRequest} Delivery
+										</Popup>
+									</Marker>
+								)}
+							</React.Fragment>;
+						})}
 					</React.Fragment>
 				);
 			})}

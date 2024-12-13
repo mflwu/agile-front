@@ -4,17 +4,17 @@ import PlaceholderMap from "./components/PlaceholderMap";
 import { sendRequestToBackend } from "./api/simpleRequests";
 import "./styles/App.css";
 import "leaflet/dist/leaflet.css";
+import { setSourceContent } from "@jridgewell/gen-mapping";
 
 function App() {
-	const [requests, setRequests] = useState([]);
-	const [currentRequest, setCurrentRequest] = useState({
+	const [tours, setTours] = useState([]);
+	const [currentTour, setCurrentTour] = useState({
 		courier: null,
 		warehouse: null,
-		pickup: null,
-		delivery: null,
+		requests: [],
 	});
 	const [selectionStep, setSelectionStep] = useState(null);
-	const [intersections, setIntersections] = useState([]); // Store intersections directly
+	const [intersections, setIntersections] = useState([]);
 
 	useEffect(() => {
 		const fetchIntersections = async () => {
@@ -37,41 +37,66 @@ function App() {
 	const handleNodeClick = (node) => {
 		if (!selectionStep) return;
 
-		const updatedRequest = { ...currentRequest };
+		const updatedTour = { ...currentTour };
 
-		if (selectionStep === "warehouse") {
-			updatedRequest.warehouse = node;
+		if (selectionStep === "courier") {
+			updatedTour.courier = node;
+			setSelectionStep("warehouse");
+		} else if (selectionStep === "warehouse") {
+			updatedTour.warehouse = node;
 			setSelectionStep("pickup");
 		} else if (selectionStep === "pickup") {
-			updatedRequest.pickup = node;
+			updatedTour.requests.push({ pickup: node, delivery: null });
 			setSelectionStep("delivery");
 		} else if (selectionStep === "delivery") {
-			updatedRequest.delivery = node;
+			// Assurez-vous qu'il y a au moins une requête pour ajouter la livraison
+			if (updatedTour.requests.length === 0) {
+				alert(
+					"Veuillez ajouter une requête de pickup avant de sélectionner une livraison."
+				);
+				return;
+			}
 
-			// Add the new request to the list of requests
-			setRequests([...requests, updatedRequest]);
+			// Ajoute la livraison à la dernière requête
+			updatedTour.requests[updatedTour.requests.length - 1].delivery = node;
+			setSelectionStep("pickup");
 
-			// Reset the selection step, the current request and the highlighted nodes to prepare for the next request
-			setSelectionStep(null);
-			setCurrentRequest({
-				courier: null,
-				warehouse: null,
-				pickup: null,
-				delivery: null,
-			});
+			// Met à jour le tour actuel sans l'ajouter à `tours`
+			setCurrentTour(updatedTour);
 		}
 
-		setCurrentRequest(updatedRequest);
+		// Met à jour l'état du tour actuel
+		setCurrentTour(updatedTour);
 	};
 
-	const startNewRequest = () => {
+	const startNewTour = () => {
 		setSelectionStep("courier");
-		setCurrentRequest({
+		setCurrentTour({
 			courier: null,
 			warehouse: null,
-			pickup: null,
-			delivery: null,
+			requests: [],
 		});
+	};
+
+	const finalizeTour = () => {
+		if (
+			currentTour.courier &&
+			currentTour.warehouse &&
+			currentTour.requests.length > 0 &&
+			currentTour.requests.every((req) => req.pickup && req.delivery)
+		) {
+			setTours([...tours, currentTour]);
+			setCurrentTour({
+				courier: null,
+				warehouse: null,
+				requests: [],
+			});
+			setSelectionStep(null);
+		} else {
+			alert(
+				"Le tour n'est pas complet. Assurez-vous d'avoir sélectionné un courier, un warehouse et au moins une requête complète."
+			);
+		}
 	};
 
 	return (
@@ -79,17 +104,19 @@ function App() {
 			<div className="map-section">
 				<PlaceholderMap
 					intersections={intersections}
-					requests={requests}
+					tours={tours}
 					onNodeClick={handleNodeClick}
 				/>
 			</div>
+			{console.log("app.jsx", tours)}
 			<div className="planner-section">
 				<DeliveryPlanner
-					startNewRequest={startNewRequest}
-					setCurrentRequest={setCurrentRequest}
-					requests={requests}
+					startNewTour={startNewTour}
+					tours={tours}
+					setCurrentTour={setCurrentTour}
 					selectionStep={selectionStep}
 					setSelectionStep={setSelectionStep}
+					finalizeTour={finalizeTour}
 				/>
 			</div>
 		</div>
