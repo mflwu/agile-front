@@ -1,5 +1,5 @@
 import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
 
 // Fonction pour créer des icônes personnalisés avec forme et couleur
@@ -30,6 +30,7 @@ const PlaceholderMap = ({
 	onNodeClick,
 	highlightedNodes,
 	requests,
+	route = [], // New prop to handle the route
 }) => {
 	const center = [45.75465, 4.8674865]; // Centre de la carte
 
@@ -110,6 +111,15 @@ const PlaceholderMap = ({
 					</React.Fragment>
 				);
 			})}
+
+			{/* Display route as a Polyline */}
+			{route.length > 1 && (
+				<Polyline
+					positions={route.map((point) => [point.latitude, point.longitude])}
+					color="blue" // Set the color of the route
+					weight={4} // Thickness of the line
+				/>
+			)}
 		</MapContainer>
 	);
 };
