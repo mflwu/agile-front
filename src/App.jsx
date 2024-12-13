@@ -47,33 +47,42 @@ function App() {
 	const handleNodeClick = async (node) => {
 		if (!selectionStep) return;
 
-		const updatedRequest = { ...currentRequest };
+    const updatedRequest = { ...currentRequest };
 
-		if (selectionStep === "warehouse") {
-			updatedRequest.warehouse = node;
-			setSelectionStep("pickup");
-		} else if (selectionStep === "pickup") {
-			updatedRequest.pickup = node;
-			setSelectionStep("delivery");
-		} else if (selectionStep === "delivery") {
-			updatedRequest.delivery = node;
+    if (selectionStep === "warehouse") {
+        updatedRequest.warehouse = node;
+        setSelectionStep("pickup");
+    } else if (selectionStep === "pickup") {
+        updatedRequest.pickup = node;
+        setSelectionStep("delivery");
+    } else if (selectionStep === "delivery") {
+        updatedRequest.delivery = node;
 
-			// Add the new request to the list of requests
-			setRequests([...requests, updatedRequest]);
-      sendRequestToBackend(updatedRequest);
-      displayRoute();
-			// Reset the selection step, the current request and the highlighted nodes to prepare for the next request
-			setSelectionStep(null);
-			setCurrentRequest({
-				courier: null,
-				warehouse: null,
-				pickup: null,
-				delivery: null,
-			});
-		}
+        // Ajouter à la liste des requêtes
+        setRequests([...requests, updatedRequest]);
 
-		setCurrentRequest(updatedRequest);
-	};
+        // Envoyer au back-end
+        try {
+            console.log("Sending request to backend with:", updatedRequest);
+            const response = await sendRequestToBackend(updatedRequest);
+            console.log("Response from backend:", response);
+        } catch (error) {
+            console.error("Error sending request to backend:", error);
+        }
+
+        // Réinitialiser pour la prochaine requête
+        setSelectionStep(null);
+        setCurrentRequest({
+            courier: null,
+            warehouse: null,
+            pickup: null,
+            delivery: null,
+        });
+    }
+
+    setCurrentRequest(updatedRequest);
+};
+
 
 	const startNewRequest = () => {
 		setSelectionStep("courier");
