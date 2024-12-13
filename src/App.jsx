@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DeliveryPlanner from "./components/DeliveryPlanner";
 import PlaceholderMap from "./components/PlaceholderMap";
+import { sendRequestToBackend } from "./api/simpleRequests";
 import "./styles/App.css";
 import "leaflet/dist/leaflet.css";
 
@@ -20,20 +21,22 @@ function App() {
     delivery: null,
   });
 
-  // Fetch intersections from backend
   useEffect(() => {
-    fetch("http://localhost:8080/city-map/loadmap")
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to load city map");
-        return response.json();
-      })
-      .then((data) => {
+    const fetchIntersections = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/city-map/loadmap");
+        if (!response.ok) {
+          throw new Error("Failed to load city map");
+        }
+        const data = await response.json();
         setIntersections(data.intersections || []); // Set intersections
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching city map:", error);
         setIntersections([]); // Fallback to empty list
-      });
+      }
+    };
+
+    fetchIntersections();
   }, []);
 
   const handleNodeClick = (node) => {
@@ -52,8 +55,17 @@ function App() {
     } else if (selectionStep === "delivery") {
       updatedRequest.delivery = node;
       setRequests([...requests, updatedRequest]);
+      console.log("New request:", updatedRequest);
+
+      // Send the request to the backend
+      sendRequestToBackend(updatedRequest)
+        .then((response) => console.log("Backend response:", response))
+        .catch((error) =>
+          console.error("Failed to send request to backend:", error)
+        );
+
       setSelectionStep(null);
-      setCurrentRequest({ warehouse: null, pickup: null, delivery: null }); // Reset for the next request
+      setCurrentRequest({ warehouse: null, pickup: null, delivery: null });
       setHighlightedNodes({ warehouse: null, pickup: null, delivery: null });
     }
 
