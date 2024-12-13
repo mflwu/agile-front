@@ -45,7 +45,7 @@ const PlaceholderMap = ({ intersections = [], onNodeClick }) => {
 				<Marker
 					key={node.id}
 					position={[node.latitude, node.longitude]}
-					icon={createIcon("blue")}
+					icon={createIcon("black")}
 					eventHandlers={{
 						click: () => onNodeClick(node),
 					}}
