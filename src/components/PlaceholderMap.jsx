@@ -115,7 +115,7 @@ const PlaceholderMap = ({
 			{/* Display route as a Polyline */}
 			{route.length > 1 && (
 				<Polyline
-					positions={route.map((point) => [point.latitude, point.longitude])}
+					positions={route.map((point) => [point.lat, point.lng])} // Extract lat and lng
 					color="blue" // Set the color of the route
 					weight={4} // Thickness of the line
 				/>

@@ -57,40 +57,15 @@ function App() {
 
             try {
                 const response = await sendRequestToBackend(updatedRequest);
-                let formattedResponse = [];
-
-                if (Array.isArray(response)) {
-                    formattedResponse = response;
-                } else {
-                    try {
-                        // Attempt to parse if response is a JSON string
-                        const parsedResponse = JSON.parse(response);
-                        if (Array.isArray(parsedResponse)) {
-                            formattedResponse = parsedResponse;
-                        } else {
-                            throw new Error("Response is not an array");
-                        }
-                    } catch (error) {
-                        console.error("Failed to parse response as an array:", error);
-                    }
+                const parsedResponse = JSON.parse(response);
+                if (response) {
+                    const routeData = parsedResponse.map(([latitude, longitude]) => ({
+                        lat: latitude,
+                        lng: longitude,
+                    }));
+                    console.log("Received route data:", routeData);
+                    setRoute(routeData); // Update the route state
                 }
-                // Assuming response contains the route data
-                if (response && Array.isArray(response)) {
-                      console.log("Response received:", response);
-                  
-                      const formattedRoute = response.map(([latitude, longitude]) => ({
-                          lat: latitude,
-                          lng: longitude,
-                      }));
-                  
-                      setRoute(formattedRoute); // Update route with backend response
-                  
-                      console.log("Formatted route:", formattedRoute);
-                  } else {
-                      console.error("Unexpected response format:", response);
-                  }
-
-                console.log("Response from backend:", response);
             } catch (error) {
                 console.error("Error sending request to backend:", error);
             }
