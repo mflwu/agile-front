@@ -7,7 +7,7 @@ export const sendRequestToBackend = async (updatedRequest) => {
             deliveryId: updatedRequest.delivery.id,
         };
 
-        const response = await fetch("http://localhost:8080/city-map/requests", {
+        const response = await fetch("http://localhost:8080/city-map/delivery/requests", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -29,25 +29,3 @@ export const sendRequestToBackend = async (updatedRequest) => {
     }
 };
 
-export const fetchFastestPathData = async () => {
-    try {
-        const response = await fetch("http://localhost:8080/city-map/fastest-path", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Error: ${response.status} - ${errorText}`);
-        }
-
-        const data = await response.json(); // Assume this is a list of lat/lng pairs
-        console.log("Fastest path data retrieved successfully:", data);
-        return data;
-    } catch (error) {
-        console.error("Error fetching fastest path data:", error);
-        throw error;
-    }
-};
