@@ -6,6 +6,7 @@ import {
 	FaPlus,
 	FaUser,
 } from "react-icons/fa";
+import { RxCross2 } from "react-icons/rx";
 
 const DeliveryPlanner = ({
 	startNewTour,
@@ -63,22 +64,19 @@ const DeliveryPlanner = ({
 			<div
 				style={{
 					display: "flex",
-					justifyContent: "space-between",
+					justifyContent: "center",
 					alignItems: "center",
 					backgroundColor: "#f0f0f0",
 					padding: "1rem",
 					borderRadius: "0.75rem",
 					marginBottom: "1rem",
+					gap: "1rem",
 				}}
 			>
-				<FaUser size={30} color="#9C27B0" title="Courier" />
-				<FaWarehouse size={30} color="#4CAF50" title="Warehouse" />
-				<FaTruckPickup size={30} color="#FF9800" title="Pickup" />
-				<FaShippingFast size={30} color="#2196F3" title="Delivery" />
 				<button
-					onClick={startNewTourWithCourier}
+					onClick={selectionStep === null ? startNewTourWithCourier : null}
 					style={{
-						backgroundColor: "#4CAF50",
+						backgroundColor: "#336659",
 						color: "white",
 						padding: "0.5rem 1rem",
 						fontSize: "1rem",
@@ -90,15 +88,20 @@ const DeliveryPlanner = ({
 						gap: "0.5rem",
 					}}
 				>
-					<FaPlus />
-					New Tour
+					{selectionStep === null ? (
+						<>
+							<FaPlus /> New Tour
+						</>
+					) : (
+						"Current Tour n°" + tours.length
+					)}
 				</button>
 
 				{selectionStep == "pickup" && (
 					<button
 						onClick={endTour}
 						style={{
-							backgroundColor: "#4CAF50",
+							backgroundColor: "#800020",
 							color: "white",
 							padding: "0.5rem 1rem",
 							fontSize: "1rem",
@@ -110,7 +113,7 @@ const DeliveryPlanner = ({
 							gap: "0.5rem",
 						}}
 					>
-						<FaPlus />
+						<RxCross2 />
 						End tour
 					</button>
 				)}
@@ -168,6 +171,9 @@ const DeliveryPlanner = ({
 							fontSize: "0.9rem",
 						}}
 					>
+						<div style={{ padding: "0.25rem" }}>
+							<strong>Tour n° : {indexTour + 1}</strong>
+						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaUser size={15} color="#9C27B0" title="Courier" />
 							<strong>Courier:</strong> {tour.courier.name}

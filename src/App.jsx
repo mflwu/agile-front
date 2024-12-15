@@ -40,8 +40,10 @@ function App() {
 		const updatedTour = { ...currentTour };
 
 		if (selectionStep === "courier") {
-			updatedTour.courier = node;
-			setSelectionStep("warehouse");
+			alert(
+				"Select a courier before choosing a warehouse, pickup or delivery location."
+			);
+			return;
 		} else if (selectionStep === "warehouse") {
 			updatedTour.warehouse = node;
 			setSelectionStep("pickup");
@@ -52,7 +54,7 @@ function App() {
 			// Assurez-vous qu'il y a au moins une requête pour ajouter la livraison
 			if (updatedTour.requests.length === 0) {
 				alert(
-					"Veuillez ajouter une requête de pickup avant de sélectionner une livraison."
+					"Please add a pickup request before selecting a delivery location."
 				);
 				return;
 			}
@@ -94,7 +96,7 @@ function App() {
 			setSelectionStep(null);
 		} else {
 			alert(
-				"Le tour n'est pas complet. Assurez-vous d'avoir sélectionné un courier, un warehouse et au moins une requête complète."
+				"The tour is not complete. Make sure you have selected a courier, a warehouse, and at least one complete request."
 			);
 		}
 	};
@@ -106,9 +108,10 @@ function App() {
 					intersections={intersections}
 					tours={tours}
 					onNodeClick={handleNodeClick}
+					selectionStep={selectionStep}
+					currentTour={currentTour}
 				/>
 			</div>
-			{console.log("app.jsx", tours)}
 			<div className="planner-section">
 				<DeliveryPlanner
 					startNewTour={startNewTour}
