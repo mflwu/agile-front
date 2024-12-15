@@ -4,7 +4,6 @@ import PlaceholderMap from "./components/PlaceholderMap";
 import { sendRequestToBackend } from "./api/simpleRequests";
 import "./styles/App.css";
 import "leaflet/dist/leaflet.css";
-import { setSourceContent } from "@jridgewell/gen-mapping";
 
 function App() {
 	const [tours, setTours] = useState([]);
@@ -15,6 +14,7 @@ function App() {
 	});
 	const [selectionStep, setSelectionStep] = useState(null);
 	const [intersections, setIntersections] = useState([]);
+	const [route, setRoute] = useState([]);
 
 	useEffect(() => {
 		const fetchIntersections = async () => {
@@ -34,7 +34,7 @@ function App() {
 		fetchIntersections();
 	}, []);
 
-	const handleNodeClick = (node) => {
+	const handleNodeClick = async (node) => {
 		if (!selectionStep) return;
 
 		const updatedTour = { ...currentTour };
@@ -62,6 +62,24 @@ function App() {
 			// Ajoute la livraison à la dernière requête
 			updatedTour.requests[updatedTour.requests.length - 1].delivery = node;
 			setSelectionStep("pickup");
+
+			const updatedRequest =
+				updatedTour.requests[updatedTour.requests.length - 1];
+
+			try {
+				const response = await sendRequestToBackend(updatedRequest);
+				const parsedResponse = JSON.parse(response);
+				if (response) {
+					const routeData = parsedResponse.map(([latitude, longitude]) => ({
+						lat: latitude,
+						lng: longitude,
+					}));
+					console.log("Received route data:", routeData);
+					setRoute(routeData); // Update the route state
+				}
+			} catch (error) {
+				console.error("Error sending request to backend:", error);
+			}
 
 			// Met à jour le tour actuel sans l'ajouter à `tours`
 			setCurrentTour(updatedTour);
@@ -110,6 +128,7 @@ function App() {
 					onNodeClick={handleNodeClick}
 					selectionStep={selectionStep}
 					currentTour={currentTour}
+					route={route}
 				/>
 			</div>
 			<div className="planner-section">
