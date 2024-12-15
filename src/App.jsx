@@ -64,19 +64,32 @@ function App() {
 			setSelectionStep("pickup");
 
 			// try {
-			// 	const response = await sendRequestToBackend(updatedRequest);
-			// 	const parsedResponse = JSON.parse(response);
-			// 	if (response) {
-			// 		const routeData = parsedResponse.map(([latitude, longitude]) => ({
-			// 			lat: latitude,
-			// 			lng: longitude,
-			// 		}));
-			// 		console.log("Received route data:", routeData);
-			// 		setRoute(routeData); // Update the route state
-			// 	}
-			// } catch (error) {
-			// 	console.error("Error sending request to backend:", error);
-			// }
+            //     // Construire le payload directement ici
+            //     const payload = {
+            //         start: updatedTour.warehouse.id,
+            //         pickups: updatedTour.requests.map((req) => req.pickup.id),
+            //         dropoffs: updatedTour.requests.map((req) => req.delivery.id),
+            //     };
+    
+            //     console.log("Payload to send to backend:", JSON.stringify(payload, null, 2));
+    
+            //     // Envoyer les données au backend
+            //     const response = await sendRequestToBackend(payload);
+    
+            //     console.log("Response from backend:", response);
+    
+            //     // Gestion de la réponse si nécessaire (affichage, mise à jour d'état)
+            //     const parsedResponse = JSON.parse(response);
+            //     const routeData = parsedResponse.map(([latitude, longitude]) => ({
+            //         lat: latitude,
+            //         lng: longitude,
+            //     }));
+            //     console.log("Received route data:", routeData);
+            //     setRoute(routeData); // Mettre à jour le trajet affiché sur la carte
+            // } catch (error) {
+            //     console.error("Error sending request to backend:", error);
+            // }
+        
 
 			// Met à jour le tour actuel sans l'ajouter à `tours`
 			setCurrentTour(updatedTour);
@@ -95,26 +108,52 @@ function App() {
 		});
 	};
 
-	const finalizeTour = () => {
-		if (
-			currentTour.courier &&
-			currentTour.warehouse &&
-			currentTour.requests.length > 0 &&
-			currentTour.requests.every((req) => req.pickup && req.delivery)
-		) {
-			setTours([...tours, currentTour]);
-			setCurrentTour({
-				courier: null,
-				warehouse: null,
-				requests: [],
-			});
-			setSelectionStep(null);
-		} else {
-			alert(
-				"The tour is not complete. Make sure you have selected a courier, a warehouse, and at least one complete request."
-			);
-		}
-	};
+	const finalizeTour = async () => {
+        if (
+            currentTour.courier &&
+            currentTour.warehouse &&
+            currentTour.requests.length > 0 &&
+            currentTour.requests.every((req) => req.pickup && req.delivery)
+        ) {
+            try {
+                // Créer le payload
+                const payload = {
+                    start: currentTour.warehouse.id,
+                    pickups: currentTour.requests.map((req) => req.pickup.id),
+                    dropoffs: currentTour.requests.map((req) => req.delivery.id),
+                };
+    
+                console.log("Payload to be sent to backend:", payload); // Debugging
+    
+                // Envoyer les données au backend
+                const response = await sendRequestToBackend(payload);
+    
+                console.log("Backend response:", response); // Debugging
+    
+                // Mettre à jour l'état avec la route reçue
+                setRoute(response.map(([lat, lng]) => ({ lat, lng })));
+    
+                // Ajouter le tour actuel dans la liste des tours
+                setTours([...tours, currentTour]);
+    
+                // Réinitialiser pour une nouvelle tournée
+                setCurrentTour({
+                    courier: null,
+                    warehouse: null,
+                    requests: [],
+                });
+                setSelectionStep(null);
+            } catch (error) {
+                console.error("Error sending payload to backend:", error);
+                alert("An error occurred while finalizing the tour. Please try again.");
+            }
+        } else {
+            alert(
+                "The tour is not complete. Make sure you have selected a courier, a warehouse, and at least one complete request."
+            );
+        }
+    };
+    
 
 	return (
 		<div className="App">
