@@ -63,23 +63,20 @@ function App() {
 			updatedTour.requests[updatedTour.requests.length - 1].delivery = node;
 			setSelectionStep("pickup");
 
-			const updatedRequest =
-				updatedTour.requests[updatedTour.requests.length - 1];
-
-			try {
-				const response = await sendRequestToBackend(updatedRequest);
-				const parsedResponse = JSON.parse(response);
-				if (response) {
-					const routeData = parsedResponse.map(([latitude, longitude]) => ({
-						lat: latitude,
-						lng: longitude,
-					}));
-					console.log("Received route data:", routeData);
-					setRoute(routeData); // Update the route state
-				}
-			} catch (error) {
-				console.error("Error sending request to backend:", error);
-			}
+			// try {
+			// 	const response = await sendRequestToBackend(updatedRequest);
+			// 	const parsedResponse = JSON.parse(response);
+			// 	if (response) {
+			// 		const routeData = parsedResponse.map(([latitude, longitude]) => ({
+			// 			lat: latitude,
+			// 			lng: longitude,
+			// 		}));
+			// 		console.log("Received route data:", routeData);
+			// 		setRoute(routeData); // Update the route state
+			// 	}
+			// } catch (error) {
+			// 	console.error("Error sending request to backend:", error);
+			// }
 
 			// Met à jour le tour actuel sans l'ajouter à `tours`
 			setCurrentTour(updatedTour);
