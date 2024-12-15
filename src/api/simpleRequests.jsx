@@ -7,7 +7,7 @@ export const sendRequestToBackend = async (updatedRequest) => {
             deliveryId: updatedRequest.delivery.id,
         };
 
-        const response = await fetch("http://localhost:8080/delivery/requests", {
+        const response = await fetch("http://localhost:8080/city-map/delivery/requests", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -28,3 +28,4 @@ export const sendRequestToBackend = async (updatedRequest) => {
         throw error; // Re-throw to allow caller to handle it
     }
 };
+
