@@ -45,3 +45,14 @@ export async function fetchRouteCoordinates(nodeIds) {
         throw error;
     }
 }
+
+// Récupérer les coursiers
+export async function getCouriers() {
+    try {
+        const response = await apiClient.get(`/data/get/allcourier`);
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching couriers:", error.response?.data || error.message);
+        throw error; 
+    }
+}

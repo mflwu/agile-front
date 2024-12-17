@@ -118,9 +118,10 @@ function App() {
             try {
                 // Create the payload
                 const payload = {
-                    start: currentTour.warehouse.id,
+                    start: Number(currentTour.warehouse.id),
                     pickups: currentTour.requests.map((req) => req.pickup.id),
                     dropoffs: currentTour.requests.map((req) => req.delivery.id),
+					courier : currentTour.courier.id
                 };
         
                 console.log("Payload to be sent to backend:", payload); // Debugging

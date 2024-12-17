@@ -1,4 +1,5 @@
 import React, { useState, useEffect  } from "react";
+import { getCouriers } from "../api/Services";
 import {
 	FaWarehouse,
 	FaTruckPickup,
@@ -18,11 +19,21 @@ const DeliveryPlanner = ({
 	setRoute
 }) => {
 	const [selectedCourier, setSelectedCourier] = useState(null);
-	const couriers = [
-		{ id: 1, name: "John Doe" },
-		{ id: 2, name: "Jane Smith" },
-		{ id: 3, name: "Mike Johnson" },
-	];
+	const [couriers, setCouriers] = useState([]);
+
+	useEffect(() => {
+		const fetchCouriers = async () => {
+			try {
+				const data = await getCouriers(); // Appel à l'API
+				setCouriers(data); // On garde uniquement les noms
+			} catch (err) {
+				setError("Failed to load couriers. Please try again.");
+				console.error("Error fetching couriers:", err);
+			}
+		};
+		fetchCouriers();
+	}, []);
+
 	const handleTourClick = (tour) => {
 		if (tour.route) {
 			console.log("Tour clicked:", tour);
@@ -139,32 +150,34 @@ const DeliveryPlanner = ({
 			{/* Sélection du livreur */}
 			{selectionStep === "courier" && (
 				<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					gap: "0.5rem",
+					marginBottom: "1rem",
+				}}
+			>
+				<h3>Select a Courier:</h3>
+				{couriers.map((courier, index) => (
+					<button
+					key={courier.id}
+					onClick={() => handleCourierSelect(courier)} // Passe l'objet complet
 					style={{
-						display: "flex",
-						flexDirection: "column",
-						gap: "0.5rem",
-						marginBottom: "1rem",
+						padding: "0.5rem 1rem",
+						backgroundColor:
+							selectedCourier?.id === courier.id ? "#4CAF50" : "#f0f0f0",
+						color: selectedCourier?.id === courier.id ? "white" : "black",
+						border: "1px solid #ccc",
+						borderRadius: "0.5rem",
+						cursor: "pointer",
 					}}
 				>
-					<h3>Select a Courier:</h3>
-					{couriers.map((courier) => (
-						<button
-							key={courier.id}
-							onClick={() => handleCourierSelect(courier)}
-							style={{
-								padding: "0.5rem 1rem",
-								backgroundColor:
-									selectedCourier?.id === courier.id ? "#4CAF50" : "#f0f0f0",
-								color: selectedCourier?.id === courier.id ? "white" : "black",
-								border: "1px solid #ccc",
-								borderRadius: "0.5rem",
-								cursor: "pointer",
-							}}
-						>
-							{courier.name}
-						</button>
-					))}
-				</div>
+					{courier.name}
+				</button>
+				))}
+
+			</div>
+
 			)}
 
 			{/* Liste des tours */}
