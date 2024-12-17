@@ -35,13 +35,3 @@ export async function fetchIntersections() {
     }
 }
 
-// Récupérer les coordonnées des trajets optimisés
-export async function fetchRouteCoordinates(nodeIds) {
-    try {
-        const response = await apiClient.post(`/route-coordinates`, nodeIds);
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching route coordinates:", error.response?.data || error.message);
-        throw error;
-    }
-}
