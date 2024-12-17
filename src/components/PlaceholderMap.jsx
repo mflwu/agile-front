@@ -89,9 +89,12 @@ const PlaceholderMap = ({
 	selectionStep,
 	currentTour,
 	route,
+	routeIndex,
 }) => {
 	const center = [45.75465, 4.8674865]; // Center of the map
-
+	const tourColor = colors[routeIndex % colors.length]; // Color based on index
+	console.log(routeIndex);
+	console.log(tourColor);	
 	return (
 		<MapContainer
 			center={center}
@@ -189,19 +192,19 @@ const PlaceholderMap = ({
 				);
 			})}
 
+
 			{/* Display route as a Polyline with arrows */}
-			{route.length > 1 && (
+			{route.length > 1 && routeIndex !== -1 && (
 				<>
 					<Polyline
-						positions={route.map((point) => [point.lat, point.lng])}
-						color="blue"
-						weight={4}
+					positions={route.map((point) => [point.lat, point.lng])}
+					color = {tourColor} 
+					weight={4}
 					/>
-					<ArrowsDecorator
-						route={route.map((point) => [point.lat, point.lng])}
-					/>
+					<ArrowsDecorator route={route.map((point) => [point.lat, point.lng])} color={tourColor} />
 				</>
-			)}
+				)}
+
 
 			{/* Display current tour */}
 			{currentTour && (() => {

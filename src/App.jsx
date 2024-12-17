@@ -171,6 +171,14 @@ function App() {
 					selectionStep={selectionStep}
 					currentTour={currentTour}
 					route={route}
+                    routeIndex={tours.findIndex(
+                        (tour) =>
+                          tour.route &&
+                          tour.route.length === route.length &&
+                          tour.route.every(
+                            (r, index) => r.lat === route[index]?.lat && r.lng === route[index]?.lng
+                          )
+                      )}
 				/>
 			</div>
 			<div className="planner-section">
