@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DeliveryPlanner from "./components/DeliveryPlanner";
 import PlaceholderMap from "./components/PlaceholderMap";
-import { sendRequestToBackend } from "./api/simpleRequests";
+import { sendRequestToBackend } from "./api/Services";
 import "./styles/App.css";
 import "leaflet/dist/leaflet.css";
 

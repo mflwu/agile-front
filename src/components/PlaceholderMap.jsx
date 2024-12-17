@@ -1,17 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
 	MapContainer,
 	TileLayer,
 	Marker,
 	Popup,
 	Polyline,
+	useMap,
 } from "react-leaflet";
 import L from "leaflet";
+import "leaflet-polylinedecorator";
 
-// Tableau de couleurs partagé
+// Shared colors
 const colors = ["red", "blue", "green", "purple", "orange"];
 
-// Fonction pour créer des icônes personnalisés avec forme, couleur et label
+// Shapes for markers
+const shapes = {
+	square: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+	triangle: "polygon(50% 0%, 0% 100%, 100% 100%)",
+	circle: "circle(50% at 50% 50%)",
+};
+
+// Function to create custom icons with shape, color, and label
 const createIcon = (shape, color, size = 15, label = null) => {
 	const labelHTML = label
 		? `<span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: ${
@@ -38,13 +47,41 @@ const createIcon = (shape, color, size = 15, label = null) => {
 	});
 };
 
-// Formes SVG pour les marqueurs
-const shapes = {
-	square: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-	triangle: "polygon(50% 0%, 0% 100%, 100% 100%)",
-	circle: "circle(50% at 50% 50%)",
+// Component to add arrows on the polyline
+const ArrowsDecorator = ({ route }) => {
+	const map = useMap();
+
+	useEffect(() => {
+		if (route.length > 1) {
+			// Define the polyline with arrows
+			const polylineDecorator = L.polylineDecorator(route, {
+				patterns: [
+					{
+						offset: 25, // Distance from the start
+						repeat: 50, // Arrow spacing
+						symbol: L.Symbol.arrowHead({
+							pixelSize: 10,
+							headAngle: 45,
+							pathOptions: { stroke: true, color: "blue" },
+						}),
+					},
+				],
+			});
+
+			// Add to the map
+			polylineDecorator.addTo(map);
+
+			// Cleanup when component unmounts
+			return () => {
+				map.removeLayer(polylineDecorator);
+			};
+		}
+	}, [route, map]);
+
+	return null; // This component does not render anything directly
 };
 
+// Main PlaceholderMap component
 const PlaceholderMap = ({
 	intersections = [],
 	onNodeClick,
@@ -53,7 +90,7 @@ const PlaceholderMap = ({
 	currentTour,
 	route,
 }) => {
-	const center = [45.75465, 4.8674865]; // Centre de la carte
+	const center = [45.75465, 4.8674865]; // Center of the map
 
 	return (
 		<MapContainer
@@ -65,7 +102,8 @@ const PlaceholderMap = ({
 				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			/>
-			{/* Afficher les intersections comme marqueurs gris */}
+
+			{/* Display intersections */}
 			{Object.values(intersections).map((node) => (
 				<Marker
 					key={node.id}
@@ -86,13 +124,14 @@ const PlaceholderMap = ({
 					)}
 				</Marker>
 			))}
-			{/* Afficher les requêtes avec des couleurs et des formes différentes */}
+
+			{/* Display tours */}
 			{tours.map((tour, indexTour) => {
 				const color = colors[indexTour % colors.length];
 
 				return (
 					<React.Fragment key={indexTour}>
-						{/* Warehouse - Carré */}
+						{/* Warehouse - Square */}
 						{tour.warehouse && (
 							<Marker
 								position={[tour.warehouse.latitude, tour.warehouse.longitude]}
@@ -102,6 +141,7 @@ const PlaceholderMap = ({
 							</Marker>
 						)}
 
+						{/* Requests */}
 						{tour.requests.map((request, indexRequest) => {
 							const requestNumber = indexRequest + 1;
 							return (
@@ -120,8 +160,7 @@ const PlaceholderMap = ({
 											)}
 										>
 											<Popup>
-												Tour n°{indexTour + 1} - Requête n°{requestNumber}{" "}
-												Pickup
+												Tour n°{indexTour + 1} - Requête n°{requestNumber} Pickup
 											</Popup>
 										</Marker>
 									)}
@@ -139,8 +178,7 @@ const PlaceholderMap = ({
 											)}
 										>
 											<Popup>
-												Tour n°{indexTour + 1} - Requête n°{requestNumber}{" "}
-												Delivery
+												Tour n°{indexTour + 1} - Requête n°{requestNumber} Delivery
 											</Popup>
 										</Marker>
 									)}
@@ -151,81 +189,82 @@ const PlaceholderMap = ({
 				);
 			})}
 
-			{/* Display route as a Polyline */}
+			{/* Display route as a Polyline with arrows */}
 			{route.length > 1 && (
-				<Polyline
-					positions={route.map((point) => [point.lat, point.lng])} // Extract lat and lng
-					color="blue" // Set the color of the route
-					weight={4} // Thickness of the line
-				/>
+				<>
+					<Polyline
+						positions={route.map((point) => [point.lat, point.lng])}
+						color="blue"
+						weight={4}
+					/>
+					<ArrowsDecorator
+						route={route.map((point) => [point.lat, point.lng])}
+					/>
+				</>
 			)}
 
-			{/* Afficher le tour actuel en cours de création */}
-			{currentTour && (
-				<React.Fragment>
-					{/* Déterminer la couleur pour currentTour */}
-					{(() => {
-						const currentColor = colors[tours.length % colors.length];
-						return (
-							<React.Fragment>
-								{/* Warehouse */}
-								{currentTour.warehouse && (
+			{/* Display current tour */}
+			{currentTour && (() => {
+				const currentColor = colors[tours.length % colors.length];
+				return (
+					<React.Fragment>
+						{/* Warehouse */}
+						{currentTour.warehouse && (
+							<Marker
+								position={[
+									currentTour.warehouse.latitude,
+									currentTour.warehouse.longitude,
+								]}
+								icon={createIcon(shapes.square, currentColor, 20, `W`)}
+							>
+								<Popup>Tour Actuel - Warehouse</Popup>
+							</Marker>
+						)}
+
+						{/* Requests */}
+						{currentTour.requests.map((request, indexRequest) => (
+							<React.Fragment key={`current-req-${indexRequest}`}>
+								{request.pickup && (
 									<Marker
 										position={[
-											currentTour.warehouse.latitude,
-											currentTour.warehouse.longitude,
+											request.pickup.latitude,
+											request.pickup.longitude,
 										]}
-										icon={createIcon(shapes.square, currentColor, 20, `W`)}
+										icon={createIcon(
+											shapes.triangle,
+											currentColor,
+											20,
+											`${indexRequest + 1}`
+										)}
 									>
-										<Popup>Tour Actuel - Warehouse</Popup>
+										<Popup>
+											Tour Actuel - Requête n°{indexRequest + 1} Pickup
+										</Popup>
 									</Marker>
 								)}
-								{/* Requests */}
-								{currentTour.requests.map((request, indexRequest) => (
-									<React.Fragment key={`current-req-${indexRequest}`}>
-										{request.pickup && (
-											<Marker
-												position={[
-													request.pickup.latitude,
-													request.pickup.longitude,
-												]}
-												icon={createIcon(
-													shapes.triangle,
-													currentColor,
-													20,
-													`${indexRequest + 1}`
-												)}
-											>
-												<Popup>
-													Tour Actuel - Requête n°{indexRequest + 1} Pickup
-												</Popup>
-											</Marker>
+								{request.delivery && (
+									<Marker
+										position={[
+											request.delivery.latitude,
+											request.delivery.longitude,
+										]}
+										icon={createIcon(
+											shapes.circle,
+											currentColor,
+											20,
+											`${indexRequest + 1}`
 										)}
-										{request.delivery && (
-											<Marker
-												position={[
-													request.delivery.latitude,
-													request.delivery.longitude,
-												]}
-												icon={createIcon(
-													shapes.circle,
-													currentColor,
-													20,
-													`${indexRequest + 1}`
-												)}
-											>
-												<Popup>
-													Tour Actuel - Requête n°{indexRequest + 1} Delivery
-												</Popup>
-											</Marker>
-										)}
-									</React.Fragment>
-								))}
+									>
+										<Popup>
+											Tour Actuel - Requête n°{indexRequest + 1} Delivery
+										</Popup>
+									</Marker>
+								)}
 							</React.Fragment>
-						);
-					})()}
-				</React.Fragment>
-			)}
+						))}
+					</React.Fragment>
+				);
+			})()}
 		</MapContainer>
 	);
 };
