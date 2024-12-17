@@ -7,6 +7,8 @@ import {
 	FaUser,
 } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
+import { generateDeliveryXML } from "../utils/utils";
+
 
 const DeliveryPlanner = ({
 	startNewTour,
@@ -32,6 +34,15 @@ const DeliveryPlanner = ({
 			console.warn("This tour does not have a route.");
 		}
 	};
+
+	const exportToursToXML = () => {
+        const xmlContent = generateDeliveryXML(tours);
+        const blob = new Blob([xmlContent], { type: "application/xml" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "export_tours.xml";
+        link.click();
+    };
 
 	const getStepMessage = () => {
 		if (selectionStep === "courier")
@@ -232,9 +243,35 @@ const DeliveryPlanner = ({
 								</li>
 							))}
 						</ul>
+												<button
+							onClick={() => {
+								const xmlContent = generateDeliveryXML(tour);
+								const blob = new Blob([xmlContent], { type: "application/xml" });
+								const link = document.createElement("a");
+								link.href = URL.createObjectURL(blob);
+								link.download = `tour_${indexTour + 1}.xml`;
+								link.click();
+							}}
+							style={{
+								backgroundColor: "#4CAF50",
+								color: "white",
+								padding: "0.3rem 0.8rem",
+								fontSize: "0.9rem",
+								border: "none",
+								borderRadius: "0.5rem",
+								cursor: "pointer",
+								marginTop: "0.5rem",
+								display: "block",
+        						margin: "1rem auto", // Centrage horizontal
+							}}
+						>
+							Export this tour as an XML file
+						</button>
+
 					</li>
 				))}
 			</ul>
+			
 		</div>
 	);
 };
