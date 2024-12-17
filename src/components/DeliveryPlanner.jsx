@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 import {
 	FaWarehouse,
 	FaTruckPickup,
@@ -15,6 +15,7 @@ const DeliveryPlanner = ({
 	selectionStep,
 	setSelectionStep,
 	finalizeTour,
+	setRoute
 }) => {
 	const [selectedCourier, setSelectedCourier] = useState(null);
 	const couriers = [
@@ -22,6 +23,15 @@ const DeliveryPlanner = ({
 		{ id: 2, name: "Jane Smith" },
 		{ id: 3, name: "Mike Johnson" },
 	];
+	const handleTourClick = (tour) => {
+		if (tour.route) {
+			console.log("Tour clicked:", tour);
+			setRoute(tour.route); 
+
+		} else {
+			console.warn("This tour does not have a route.");
+		}
+	};
 
 	const getStepMessage = () => {
 		if (selectionStep === "courier")
@@ -162,6 +172,7 @@ const DeliveryPlanner = ({
 				{tours.map((tour, indexTour) => (
 					<li
 						key={indexTour}
+						onClick={() => handleTourClick(tour)}
 						style={{
 							borderRadius: "0.75rem",
 							border: "2px solid #000000",

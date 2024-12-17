@@ -116,27 +116,32 @@ function App() {
             currentTour.requests.every((req) => req.pickup && req.delivery)
         ) {
             try {
-                // Créer le payload
+                // Create the payload
                 const payload = {
                     start: currentTour.warehouse.id,
                     pickups: currentTour.requests.map((req) => req.pickup.id),
                     dropoffs: currentTour.requests.map((req) => req.delivery.id),
                 };
-    
+        
                 console.log("Payload to be sent to backend:", payload); // Debugging
-    
-                // Envoyer les données au backend
+        
+                // Send the data to the backend
                 const response = await sendRequestToBackend(payload);
-    
+        
                 console.log("Backend response:", response); // Debugging
-    
-                // Mettre à jour l'état avec la route reçue
-                setRoute(response.map(([lat, lng]) => ({ lat, lng })));
-    
-                // Ajouter le tour actuel dans la liste des tours
-                setTours([...tours, currentTour]);
-    
-                // Réinitialiser pour une nouvelle tournée
+                
+                // Parse the route from the response
+                const parsedRoute = response.map(([lat, lng]) => ({ lat, lng }));
+        
+                // Add the route to the current tour
+                const updatedTour = { ...currentTour, route: parsedRoute };
+        
+                // Add the updated tour to the list of tours
+                setTours([...tours, updatedTour]);
+
+                setRoute(parsedRoute); 
+        
+                // Reset for a new tour
                 setCurrentTour({
                     courier: null,
                     warehouse: null,
@@ -153,6 +158,7 @@ function App() {
             );
         }
     };
+    
     
 
 	return (
@@ -175,6 +181,7 @@ function App() {
 					selectionStep={selectionStep}
 					setSelectionStep={setSelectionStep}
 					finalizeTour={finalizeTour}
+                    setRoute={setRoute}
 				/>
 			</div>
 		</div>
