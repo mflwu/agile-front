@@ -35,6 +35,16 @@ const DeliveryPlanner = ({
 		}
 	};
 
+	const cancelTour = () => {
+		// Reset the current tour and selection step
+		setCurrentTour({
+			courier: null,
+			warehouse: null,
+			requests: [],
+		});
+		setSelectionStep(null); // Reset to show the main sidebar
+	};
+
 	const exportToursToXML = () => {
         const xmlContent = generateDeliveryXML(tours);
         const blob = new Blob([xmlContent], { type: "application/xml" });
@@ -136,6 +146,28 @@ const DeliveryPlanner = ({
 					>
 						<RxCross2 />
 						End tour
+					</button>
+					
+				)}
+
+				{selectionStep !== null && (
+					<button
+						onClick={cancelTour}
+						style={{
+							backgroundColor: "#800020",
+							color: "white",
+							padding: "0.5rem 1rem",
+							fontSize: "1rem",
+							border: "none",
+							borderRadius: "0.5rem",
+							cursor: "pointer",
+							display: "flex",
+							alignItems: "center",
+							gap: "0.5rem",
+						}}
+					>
+						<RxCross2 />
+						Cancel Tour
 					</button>
 				)}
 			</div>

@@ -123,11 +123,27 @@ function App() {
 			} catch (error) {
 				console.error("Error sending payload to backend:", error);
 				alert("An error occurred while finalizing the tour. Please try again.");
+
+				// Reset the current tour and send the user back to the picking stage
+				setCurrentTour({
+					courier: null,
+					warehouse: null,
+					requests: [],
+				});
+				setSelectionStep("warehouse"); // Redirect user to the picking stage
 			}
 		} else {
 			alert(
 				"The tour is not complete. Make sure you have selected a courier, a warehouse, and at least one complete request."
 			);
+
+			// Reset the current tour and send the user back to the picking stage
+			setCurrentTour({
+				courier: null,
+				warehouse: null,
+				requests: [],
+			});
+			setSelectionStep("warehouse"); // Redirect user to the picking stage
 		}
 	};
 
