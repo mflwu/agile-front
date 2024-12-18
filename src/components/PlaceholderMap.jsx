@@ -62,7 +62,7 @@ const ArrowsDecorator = ({ route }) => {
 						symbol: L.Symbol.arrowHead({
 							pixelSize: 10,
 							headAngle: 45,
-							pathOptions: { stroke: true, color: "blue" },
+							pathOptions: { stroke: true ,color: "black"},
 						}),
 					},
 				],
@@ -89,12 +89,8 @@ const PlaceholderMap = ({
 	selectionStep,
 	currentTour,
 	route,
-	routeIndex,
 }) => {
-	const center = [45.75465, 4.8674865]; // Center of the map
-	const tourColor = colors[routeIndex % colors.length]; // Color based on index
-	console.log(routeIndex);
-	console.log(tourColor);	
+	const center = [45.75465, 4.8674865]; // Center of the map	
 	return (
 		<MapContainer
 			center={center}
@@ -128,10 +124,8 @@ const PlaceholderMap = ({
 				</Marker>
 			))}
 
-			{/* Display tours */}
 			{tours.map((tour, indexTour) => {
 				const color = colors[indexTour % colors.length];
-
 				return (
 					<React.Fragment key={indexTour}>
 						{/* Warehouse - Square */}
@@ -188,22 +182,22 @@ const PlaceholderMap = ({
 								</React.Fragment>
 							);
 						})}
+
+						{/* Route Polyline */}
+						{route.length > 1 && tour.route === route && (
+							<>
+								<Polyline
+									positions={route.map((point) => [point.lat, point.lng])}
+									color={color} // Use the same color as the tour
+									weight={4}
+								/>
+								<ArrowsDecorator route={route.map((point) => [point.lat, point.lng])} />
+							</>
+						)}
 					</React.Fragment>
 				);
 			})}
 
-
-			{/* Display route as a Polyline with arrows */}
-			{route.length > 1 && routeIndex !== -1 && (
-				<>
-					<Polyline
-					positions={route.map((point) => [point.lat, point.lng])}
-					color = {tourColor} 
-					weight={4}
-					/>
-					<ArrowsDecorator route={route.map((point) => [point.lat, point.lng])} color={tourColor} />
-				</>
-				)}
 
 
 			{/* Display current tour */}
@@ -265,6 +259,17 @@ const PlaceholderMap = ({
 								)}
 							</React.Fragment>
 						))}
+						{/* Display route as a Polyline with arrows */}
+						{route.length > 1 && (
+							<>
+								<Polyline
+								positions={route.map((point) => [point.lat, point.lng])}
+								color = {currentColor}
+								weight={4}
+								/>
+								<ArrowsDecorator route={route.map((point) => [point.lat, point.lng])}/>
+							</>
+						)}
 					</React.Fragment>
 				);
 			})()}
