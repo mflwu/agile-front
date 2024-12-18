@@ -139,6 +139,7 @@ const DeliveryPlanner = ({
 				</button>
 
 				{/* Bouton Import XML */}
+				{selectionStep == null && (
 				<button
 					onClick={handleImportClick}
 					style={{
@@ -153,6 +154,7 @@ const DeliveryPlanner = ({
 				>
 					Import XML
 				</button>
+				)}
 				
 
 				{/* Input File Caché */}
