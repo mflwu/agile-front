@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect, useRef  } from "react";
 import {
 	FaWarehouse,
 	FaTruckPickup,
@@ -8,6 +8,8 @@ import {
 } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { generateDeliveryXML } from "../utils/utils";
+import { importXMLFile } from "../api/Services";
+
 
 
 const DeliveryPlanner = ({
@@ -19,6 +21,14 @@ const DeliveryPlanner = ({
 	finalizeTour,
 	setRoute
 }) => {
+
+	const fileInputRef = useRef(null); // Référence pour l'input file
+
+    // Fonction pour ouvrir la boîte de dialogue fichier
+    const handleImportClick = () => {
+        fileInputRef.current.click();
+    };
+
 	const [selectedCourier, setSelectedCourier] = useState(null);
 	const couriers = [
 		{ id: 1, name: "John Doe" },
@@ -127,6 +137,50 @@ const DeliveryPlanner = ({
 						"Current Tour n°" + tours.length
 					)}
 				</button>
+
+				{/* Bouton Import XML */}
+				<button
+					onClick={handleImportClick}
+					style={{
+						backgroundColor: "#2196F3",
+						color: "white",
+						padding: "0.5rem 1rem",
+						fontSize: "1rem",
+						border: "none",
+						borderRadius: "0.5rem",
+						cursor: "pointer",
+					}}
+				>
+					Import XML
+				</button>
+				
+
+				{/* Input File Caché */}
+				<input
+				type="file"
+				accept=".xml"
+				ref={fileInputRef}
+				style={{ display: "none" }}
+				onChange={(e) => {
+					const file = e.target.files[0];
+					if (file) {
+						const fileName = file.name; // Récupère le nom du fichier
+						console.log("Selected file name:", fileName);
+
+						// Envoie le nom du fichier au back-end
+						importXMLFile(fileName)
+							.then((response) => {
+								console.log("File name sent successfully:", response);
+							})
+							.catch((error) => {
+								console.error("Error sending file name:", error);
+							});
+					}
+				}}
+			/>
+
+
+			
 
 				{selectionStep == "pickup" && (
 					<button
