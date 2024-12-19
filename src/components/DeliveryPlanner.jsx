@@ -326,7 +326,7 @@ const DeliveryPlanner = ({
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaUser size={15} color="#9C27B0" title="Courier" />
-							<strong>Courier:</strong> {"Momo TMAX"} // Ajouter le nom du courrier
+							<strong>Courier:</strong> {"Momo TMAX"} // Ajouter le nom du courrier tout.courrier.name
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaWarehouse size={15} color="#4CAF50" title="Warehouse" />
