@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import DeliveryPlanner from "./components/DeliveryPlanner";
 import PlaceholderMap from "./components/PlaceholderMap";
 import { sendRequestToBackend } from "./api/Services";
+import { fetchIntersections } from "./api/Services";
+import { generateUniqueId } from "./utils/utils";
+
 import "./styles/App.css";
 import "leaflet/dist/leaflet.css";
 
 function App() {
 	const [tours, setTours] = useState([]);
 	const [currentTour, setCurrentTour] = useState({
+		id: null,
 		courier: null,
 		warehouse: null,
 		requests: [],
@@ -17,21 +21,11 @@ function App() {
 	const [route, setRoute] = useState([]);
 
 	useEffect(() => {
-		const fetchIntersections = async () => {
-			try {
-				const response = await fetch("http://localhost:8080/city-map/loadmap");
-				if (!response.ok) {
-					throw new Error("Failed to load city map");
-				}
-				const data = await response.json();
-				setIntersections(data.intersections || []); // Set intersections
-			} catch (error) {
-				console.error("Error fetching city map:", error);
-				setIntersections([]); // Fallback to empty list
-			}
+		const fetchData = async () => {
+			await fetchIntersections(setIntersections);
 		};
 
-		fetchIntersections();
+		fetchData();
 	}, []);
 
 	const handleFileUpload = async (event) => {
@@ -52,66 +46,41 @@ function App() {
 	const handleNodeClick = async (node) => {
 		if (!selectionStep) return;
 
-		const updatedTour = { ...currentTour };
+		setCurrentTour((prevTour) => {
+			const updatedTour = { ...prevTour };
 
-		if (selectionStep === "courier") {
-			alert(
-				"Select a courier before choosing a warehouse, pickup or delivery location."
-			);
-			return;
-		} else if (selectionStep === "warehouse") {
-			updatedTour.warehouse = node;
-			setSelectionStep("pickup");
-		} else if (selectionStep === "pickup") {
-			updatedTour.requests.push({ pickup: node, delivery: null });
-			setSelectionStep("delivery");
-		} else if (selectionStep === "delivery") {
-			// Assurez-vous qu'il y a au moins une requête pour ajouter la livraison
-			if (updatedTour.requests.length === 0) {
+			if (selectionStep === "courier") {
 				alert(
-					"Please add a pickup request before selecting a delivery location."
+					"Select a courier before choosing a warehouse, pickup or delivery location."
 				);
-				return;
+				return prevTour;
+			} else if (selectionStep === "warehouse") {
+				updatedTour.warehouse = node;
+				setSelectionStep("pickup");
+			} else if (selectionStep === "pickup") {
+				updatedTour.requests = [
+					...updatedTour.requests,
+					{
+						id: generateUniqueId(),
+						pickup: node,
+						delivery: null,
+					},
+				];
+				setSelectionStep("delivery");
+			} else if (selectionStep === "delivery") {
+				if (updatedTour.requests.length === 0) {
+					alert(
+						"Please add a pickup request before selecting a delivery location."
+					);
+					return prevTour;
+				}
+
+				updatedTour.requests[updatedTour.requests.length - 1].delivery = node;
+				setSelectionStep("pickup");
 			}
 
-			// Ajoute la livraison à la dernière requête
-			updatedTour.requests[updatedTour.requests.length - 1].delivery = node;
-			setSelectionStep("pickup");
-
-			// try {
-            //     // Construire le payload directement ici
-            //     const payload = {
-            //         start: updatedTour.warehouse.id,
-            //         pickups: updatedTour.requests.map((req) => req.pickup.id),
-            //         dropoffs: updatedTour.requests.map((req) => req.delivery.id),
-            //     };
-    
-            //     console.log("Payload to send to backend:", JSON.stringify(payload, null, 2));
-    
-            //     // Envoyer les données au backend
-            //     const response = await sendRequestToBackend(payload);
-    
-            //     console.log("Response from backend:", response);
-    
-            //     // Gestion de la réponse si nécessaire (affichage, mise à jour d'état)
-            //     const parsedResponse = JSON.parse(response);
-            //     const routeData = parsedResponse.map(([latitude, longitude]) => ({
-            //         lat: latitude,
-            //         lng: longitude,
-            //     }));
-            //     console.log("Received route data:", routeData);
-            //     setRoute(routeData); // Mettre à jour le trajet affiché sur la carte
-            // } catch (error) {
-            //     console.error("Error sending request to backend:", error);
-            // }
-        
-
-			// Met à jour le tour actuel sans l'ajouter à `tours`
-			setCurrentTour(updatedTour);
-		}
-
-		// Met à jour l'état du tour actuel
-		setCurrentTour(updatedTour);
+			return updatedTour;
+		});
 	};
 
 	
@@ -119,6 +88,7 @@ function App() {
 	const startNewTour = () => {
 		setSelectionStep("courier");
 		setCurrentTour({
+			id: generateUniqueId(),
 			courier: null,
 			warehouse: null,
 			requests: [],
@@ -126,58 +96,106 @@ function App() {
 	};
 
 	const finalizeTour = async () => {
-        if (
-            currentTour.courier &&
-            currentTour.warehouse &&
-            currentTour.requests.length > 0 &&
-            currentTour.requests.every((req) => req.pickup && req.delivery)
-        ) {
-            try {
-                // Create the payload
-                const payload = {
-                    start: Number(currentTour.warehouse.id),
-                    pickups: currentTour.requests.map((req) => req.pickup.id),
-                    dropoffs: currentTour.requests.map((req) => req.delivery.id),
-					courier : currentTour.courier.id
-                };
-        
-                console.log("Payload to be sent to backend:", payload); // Debugging
-        
-                // Send the data to the backend
-                const response = await sendRequestToBackend(payload);
-        
-                console.log("Backend response:", response); // Debugging
-                
-                // Parse the route from the response
-                const parsedRoute = response.map(([lat, lng]) => ({ lat, lng }));
-        
-                // Add the route to the current tour
-                const updatedTour = { ...currentTour, route: parsedRoute };
-        
-                // Add the updated tour to the list of tours
-                setTours([...tours, updatedTour]);
+		if (
+			currentTour.courier &&
+			currentTour.warehouse &&
+			currentTour.requests.length > 0 &&
+			currentTour.requests.every((req) => req.pickup && req.delivery)
+		) {
+			try {
+				const payload = {
+					start: currentTour.warehouse.id,
+					pickups: currentTour.requests.map((req) => req.pickup.id),
+					dropoffs: currentTour.requests.map((req) => req.delivery.id),
+				};
+				const response = await sendRequestToBackend(payload);
 
-                setRoute(parsedRoute); 
-        
-                // Reset for a new tour
-                setCurrentTour({
-                    courier: null,
-                    warehouse: null,
-                    requests: [],
-                });
-                setSelectionStep(null);
-            } catch (error) {
-                console.error("Error sending payload to backend:", error);
-                alert("An error occurred while finalizing the tour. Please try again.");
-            }
-        } else {
-            alert(
-                "The tour is not complete. Make sure you have selected a courier, a warehouse, and at least one complete request."
-            );
-        }
-    };
-    
-    
+				const parsedRoute = response.map(([lat, lng]) => ({ lat, lng }));
+
+				const updatedCurrentTour = { ...currentTour, route: parsedRoute };
+
+				setTours([...tours, updatedCurrentTour]);
+
+				setRoute(parsedRoute);
+
+				setCurrentTour({
+					id: null,
+					courier: null,
+					warehouse: null,
+					requests: [],
+				});
+				setSelectionStep(null);
+			} catch (error) {
+				alert("An error occurred while finalizing the tour. Please try again.");
+				setCurrentTour({
+					id: null,
+					courier: null,
+					warehouse: null,
+					requests: [],
+				});
+				setSelectionStep("warehouse");
+			}
+		} else {
+			alert(
+				"The tour is not complete. Make sure you have selected a courier, a warehouse, and at least one complete request."
+			);
+			setCurrentTour({
+				id: null,
+				courier: null,
+				warehouse: null,
+				requests: [],
+			});
+			setSelectionStep("warehouse");
+		}
+	};
+
+	const finalizeEditedTour = async (
+		editedTour,
+		setEditedTour,
+		setEditingTourId
+	) => {
+		if (!editedTour) return;
+
+		// Vérifiez que la tournée éditée est complète
+		if (
+			editedTour.courier &&
+			editedTour.warehouse &&
+			editedTour.requests.length > 0 &&
+			editedTour.requests.every((req) => req.pickup && req.delivery)
+		) {
+			// Préparer le payload similaire à finalizeTour
+			const payload = {
+				start: editedTour.warehouse.id,
+				pickups: editedTour.requests.map((req) => req.pickup.id),
+				dropoffs: editedTour.requests.map((req) => req.delivery.id),
+			};
+
+			const response = await sendRequestToBackend(payload);
+
+			const parsedRoute = response.map(([lat, lng]) => ({ lat, lng }));
+
+			const updatedTourWithRoute = { ...editedTour, route: parsedRoute };
+
+			setTours(
+				tours.map((tour) =>
+					tour.id === editedTour.id ? updatedTourWithRoute : tour
+				)
+			);
+
+			setRoute(parsedRoute);
+
+			setEditingTourId(null);
+			setEditedTour(null);
+			try {
+			} catch (error) {
+				alert("The tour update failed. Please try again.");
+			}
+		} else {
+			alert(
+				"The edited tour is not complete. Please make sure to select a courier, a warehouse, and at least one complete request."
+			);
+		}
+	};
 
 	return (
 		<div className="App">
@@ -200,7 +218,8 @@ function App() {
 					selectionStep={selectionStep}
 					setSelectionStep={setSelectionStep}
 					finalizeTour={finalizeTour}
-                    setRoute={setRoute}
+					finalizeEditedTour={finalizeEditedTour}
+					setRoute={setRoute}
 				/>
 			</div>
 		</div>

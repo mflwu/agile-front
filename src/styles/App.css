@@ -20,3 +20,7 @@
 	overflow-y: auto; /* Allow scrolling for content overflow */
 	height: 100vh; /* Ensure full height */
 }
+
+.tour-item:hover {
+	transform: scale(1.05);
+}
