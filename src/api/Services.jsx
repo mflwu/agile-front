@@ -72,3 +72,22 @@ export async function getCouriers() {
     }
 }
 
+export async function uploadXMLContent(xmlContent) {
+    try {
+        const response = await apiClient.post(`city-map/import/load-tour-from-xml-content`, xmlContent, {
+            headers: {
+                "Content-Type": "application/xml",
+            },
+        });
+        console.log("XML content successfully sent to backend:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error(
+            "Error uploading XML content:",
+            error.response?.data || error.message
+        );
+        throw error;
+    }
+}
+
+

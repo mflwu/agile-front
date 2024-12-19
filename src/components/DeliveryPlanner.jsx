@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef  } from "react";
-import { getCouriers } from "../api/Services";
+import { getCouriers, uploadXMLContent } from "../api/Services";
 import { importXMLFile } from "../api/Services";
 import {
 	FaWarehouse,
@@ -69,10 +69,10 @@ const DeliveryPlanner = ({
 		link.click();
 	};
 
-	const handleImportedTour = async (fileName) => {
+	const handleImportedTour = async (fileContent) => {
 		try {
 			// Appeler la fonction pour importer le fichier XML
-			const response = await importXMLFile(fileName);
+			const response = await uploadXMLContent(fileContent);
 	
 			console.log("Backend response for imported tour:", response);
 	
@@ -293,20 +293,33 @@ const DeliveryPlanner = ({
 
 				{/* Input File Caché */}
 				<input
-					type="file"
-					accept=".xml"
-					ref={fileInputRef}
-					style={{ display: "none" }}
-					onChange={(e) => {
-						const file = e.target.files[0];
-						if (file) {
-							const fileName = file.name;
-							console.log("Selected file name:", fileName);
+    type="file"
+    accept=".xml"
+    ref={fileInputRef}
+    style={{ display: "none" }}
+    onChange={async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            try {
+                // Lire le contenu du fichier comme texte
+                const fileReader = new FileReader();
+                fileReader.onload = async (event) => {
+                    const fileContent = event.target.result;
+                    console.log("File content loaded:", fileContent);
 
-							handleImportedTour(fileName);
-						}
-					}}
-				/>
+                    handleImportedTour(fileContent);
+                };
+
+                // Lire le fichier comme texte
+                fileReader.readAsText(file);
+            } catch (error) {
+                console.error("Error reading file:", error);
+                alert("Failed to read the file. Please try again.");
+            }
+        }
+    }}
+/>
+
 
 				{selectionStep == "pickup" && (
 					<button
