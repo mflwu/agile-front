@@ -10,9 +10,10 @@ import {
 } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { generateDeliveryXML } from "../utils/utils";
-import { importXMLFile } from "../api/Services";
 import { HiOutlinePencil } from "react-icons/hi";
 import { MdOutlineCancel } from "react-icons/md";
+import { generateUniqueId } from "../utils/utils";
+
 
 const DeliveryPlanner = ({
 	startNewTour,
@@ -73,17 +74,17 @@ const DeliveryPlanner = ({
 			// Appeler la fonction pour importer le fichier XML
 			const response = await importXMLFile(fileName);
 	
-			console.log("Backend response for imported tour:", response); // Debugging
+			console.log("Backend response for imported tour:", response);
 	
 			// Extraire les données du backend
-			const { warehouse, pickups, dropoffs, route } = response;
+			const { warehouse, pickups, dropoffs, courier, route } = response;
 	
 			// Vérifier que les données retournées sont valides
 			if (!warehouse || !pickups || !dropoffs || !route) {
 				throw new Error("Invalid data received from backend for imported tour.");
 			}
 	
-			// Transformer les données pour qu'elles soient conformes à PlaceholderMap
+			// Formater les données pour qu'elles soient conformes à `PlaceholderMap`
 			const formattedWarehouse = {
 				id: warehouse.id,
 				latitude: warehouse.coordinates[0],
@@ -102,21 +103,30 @@ const DeliveryPlanner = ({
 				longitude: dropoff.coordinates[1],
 			}));
 	
-			// **Formatter la route**
 			const formattedRoute = route.map(([lat, lng]) => ({
 				lat,
 				lng,
 			}));
+
+			// Définir le coursier par défaut
+			const defaultCourier = { id: 1, name: "Importé par XML" };
+	
+			// Si aucun coursier n'est fourni, utilisez le coursier par défaut
+			const formattedCourier = courier
+            ? { id: courier.id, name: courier.name }
+            : defaultCourier;
+
 	
 			// Construire un objet de tournée à partir des données formatées
 			const importedTour = {
-				courier: null, // À définir ultérieurement si nécessaire
+				courier: formattedCourier, // Ajouter le coursier
 				warehouse: formattedWarehouse,
 				requests: formattedPickups.map((pickup, index) => ({
+					id: generateUniqueId(), // Générer un ID unique
 					pickup,
 					delivery: formattedDropoffs[index],
 				})),
-				route: formattedRoute, // Inclure la route formatée
+				route: formattedRoute,
 			};
 	
 			console.log("Constructed imported tour:", importedTour);
@@ -124,18 +134,13 @@ const DeliveryPlanner = ({
 			// Ajouter la tournée importée à la liste des tournées
 			setTours((prevTours) => [...prevTours, importedTour]);
 	
-			// **Mettre à jour la route pour qu'elle soit affichée sur la carte**
+			// Mettre à jour la route pour qu'elle soit affichée sur la carte
 			setRoute(formattedRoute);
 		} catch (error) {
 			console.error("Error handling imported tour:", error);
 			alert("An error occurred while importing the tour. Please check the file and try again.");
 		}
 	};
-	
-	
-	
-	
-
 	
 
 	const cancelTour = () => {
@@ -444,7 +449,7 @@ const DeliveryPlanner = ({
 
 						<div style={{ padding: "0.25rem" }}>
 							<FaUser size={15} color="#9C27B0" title="Courier" />
-							<strong>Courier:</strong> {"Momo TMAX"} // Ajouter le nom du courrier
+							<strong>Courier:</strong> {tour.courier.name} 
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaWarehouse size={15} color="#4CAF50" title="Warehouse" />

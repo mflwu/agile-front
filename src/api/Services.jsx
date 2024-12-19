@@ -47,7 +47,7 @@ export async function fetchIntersections(setIntersections) {
 export async function importXMLFile(filePath) {
 	try {
 		// Envoie le nom du fichier via une requête GET
-		const response = await apiClient.get(`city-map/import-xml`, {
+		const response = await apiClient.get(`city-map/import/load-tour-from-xml`, {
 			params: { filePath }, // Ajouter le paramètre filePath dans l'URL
 		});
 		console.log("File successfully sent to backend:", response.data);
@@ -72,16 +72,3 @@ export async function getCouriers() {
     }
 }
 
-export async function importXMLFile(filePath) {
-    try {
-        // Envoie le nom du fichier via une requête GET
-        const response = await apiClient.get(`city-map/import/load-tour-from-xml`, {
-            params: { filePath }, // Ajouter le paramètre filePath dans l'URL
-        });
-        console.log("File successfully sent to backend:", response.data);
-        return response.data;
-    } catch (error) {
-        console.error("Error sending file name:", error.response?.data || error.message);
-        throw error;
-    }
-}
