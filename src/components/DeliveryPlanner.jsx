@@ -17,13 +17,14 @@ const DeliveryPlanner = ({
 	selectionStep,
 	setSelectionStep,
 	finalizeTour,
-	setTours, // Ajoutez setTours ici
-	setRoute
-	
+	finalizeEditedTour,
+	setRoute,
+  setTours, // Ajoutez setTours ici
 }) => {
-
 	const fileInputRef = useRef(null); // Référence pour l'input file
-	const [currentlyEditingTour, setCurrentlyEditingTour] = useState(false);
+	const [editingTourId, setEditingTourId] = useState(null);
+	const [editedTour, setEditedTour] = useState(null);
+
 
 	// Fonction pour ouvrir la boîte de dialogue fichier
 	const handleImportClick = () => {
@@ -55,6 +56,19 @@ const DeliveryPlanner = ({
 			console.warn("This tour does not have a route.");
 		}
 	};
+
+
+	const cancelTour = () => {
+		// Reset the current tour and selection step
+		setCurrentTour({
+			id: null,
+			courier: null,
+			warehouse: null,
+			requests: [],
+		});
+		setSelectionStep(null); // Reset to show the main sidebar
+	};
+
 
 	const exportToursToXML = () => {
 		const xmlContent = generateDeliveryXML(tours);
@@ -239,7 +253,9 @@ const DeliveryPlanner = ({
 							const fileName = file.name;
 							console.log("Selected file name:", fileName);
 
+
 							handleImportedTour(fileName);
+
 						}
 					}}
 				/>
