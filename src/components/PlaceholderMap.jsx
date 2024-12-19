@@ -62,7 +62,7 @@ const ArrowsDecorator = ({ route }) => {
 						symbol: L.Symbol.arrowHead({
 							pixelSize: 10,
 							headAngle: 45,
-							pathOptions: { stroke: true ,color: "black"},
+							pathOptions: { stroke: true, color: "black" },
 						}),
 					},
 				],
@@ -90,7 +90,7 @@ const PlaceholderMap = ({
 	currentTour,
 	route,
 }) => {
-	const center = [45.75465, 4.8674865]; // Center of the map	
+	const center = [45.75465, 4.8674865]; // Center of the map
 	return (
 		<MapContainer
 			center={center}
@@ -157,7 +157,8 @@ const PlaceholderMap = ({
 											)}
 										>
 											<Popup>
-												Tour n°{indexTour + 1} - Requête n°{requestNumber} Pickup
+												Tour n°{indexTour + 1} - Requête n°{requestNumber}{" "}
+												Pickup
 											</Popup>
 										</Marker>
 									)}
@@ -175,7 +176,8 @@ const PlaceholderMap = ({
 											)}
 										>
 											<Popup>
-												Tour n°{indexTour + 1} - Requête n°{requestNumber} Delivery
+												Tour n°{indexTour + 1} - Requête n°{requestNumber}{" "}
+												Delivery
 											</Popup>
 										</Marker>
 									)}
@@ -191,88 +193,91 @@ const PlaceholderMap = ({
 									color={color} // Use the same color as the tour
 									weight={4}
 								/>
-								<ArrowsDecorator route={route.map((point) => [point.lat, point.lng])} />
+								<ArrowsDecorator
+									route={route.map((point) => [point.lat, point.lng])}
+								/>
 							</>
 						)}
 					</React.Fragment>
 				);
 			})}
 
-
-
 			{/* Display current tour */}
-			{currentTour && (() => {
-				const currentColor = colors[tours.length % colors.length];
-				return (
-					<React.Fragment>
-						{/* Warehouse */}
-						{currentTour.warehouse && (
-							<Marker
-								position={[
-									currentTour.warehouse.latitude,
-									currentTour.warehouse.longitude,
-								]}
-								icon={createIcon(shapes.square, currentColor, 20, `W`)}
-							>
-								<Popup>Tour Actuel - Warehouse</Popup>
-							</Marker>
-						)}
+			{currentTour &&
+				(() => {
+					const currentColor = colors[tours.length % colors.length];
+					return (
+						<React.Fragment>
+							{/* Warehouse */}
+							{currentTour.warehouse && (
+								<Marker
+									position={[
+										currentTour.warehouse.latitude,
+										currentTour.warehouse.longitude,
+									]}
+									icon={createIcon(shapes.square, currentColor, 20, `W`)}
+								>
+									<Popup>Tour Actuel - Warehouse</Popup>
+								</Marker>
+							)}
 
-						{/* Requests */}
-						{currentTour.requests.map((request, indexRequest) => (
-							<React.Fragment key={`current-req-${indexRequest}`}>
-								{request.pickup && (
-									<Marker
-										position={[
-											request.pickup.latitude,
-											request.pickup.longitude,
-										]}
-										icon={createIcon(
-											shapes.triangle,
-											currentColor,
-											20,
-											`${indexRequest + 1}`
-										)}
-									>
-										<Popup>
-											Tour Actuel - Requête n°{indexRequest + 1} Pickup
-										</Popup>
-									</Marker>
-								)}
-								{request.delivery && (
-									<Marker
-										position={[
-											request.delivery.latitude,
-											request.delivery.longitude,
-										]}
-										icon={createIcon(
-											shapes.circle,
-											currentColor,
-											20,
-											`${indexRequest + 1}`
-										)}
-									>
-										<Popup>
-											Tour Actuel - Requête n°{indexRequest + 1} Delivery
-										</Popup>
-									</Marker>
-								)}
-							</React.Fragment>
-						))}
-						{/* Display route as a Polyline with arrows */}
-						{route.length > 1 && (
-							<>
-								<Polyline
-								positions={route.map((point) => [point.lat, point.lng])}
-								color = {currentColor}
-								weight={4}
-								/>
-								<ArrowsDecorator route={route.map((point) => [point.lat, point.lng])}/>
-							</>
-						)}
-					</React.Fragment>
-				);
-			})()}
+							{/* Requests */}
+							{currentTour.requests.map((request, indexRequest) => (
+								<React.Fragment key={`current-req-${indexRequest}`}>
+									{request.pickup && (
+										<Marker
+											position={[
+												request.pickup.latitude,
+												request.pickup.longitude,
+											]}
+											icon={createIcon(
+												shapes.triangle,
+												currentColor,
+												20,
+												`${indexRequest + 1}`
+											)}
+										>
+											<Popup>
+												Tour Actuel - Requête n°{indexRequest + 1} Pickup
+											</Popup>
+										</Marker>
+									)}
+									{request.delivery && (
+										<Marker
+											position={[
+												request.delivery.latitude,
+												request.delivery.longitude,
+											]}
+											icon={createIcon(
+												shapes.circle,
+												currentColor,
+												20,
+												`${indexRequest + 1}`
+											)}
+										>
+											<Popup>
+												Tour Actuel - Requête n°{indexRequest + 1} Delivery
+											</Popup>
+										</Marker>
+									)}
+								</React.Fragment>
+							))}
+							{/* Display route as a Polyline with arrows */}
+							{route.length > 1 && (
+								<>
+									<Polyline
+										positions={route.map((point) => [point.lat, point.lng])}
+										color={currentColor}
+										weight={4}
+									/>
+									<ArrowsDecorator
+										route={route.map((point) => [point.lat, point.lng])}
+									/>
+								</>
+							)}
+						</React.Fragment>
+					);
+				})()}
 		</MapContainer>
 	);
 };

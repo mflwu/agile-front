@@ -38,7 +38,7 @@ function App() {
 	const handleFileUpload = async (event) => {
 		const file = event.target.files[0]; // Récupérer le fichier sélectionné
 		if (!file) return;
-	
+
 		try {
 			const response = await importXMLFile(file); // Envoyer le fichier au back-end
 			console.log("Processed data from XML:", response);
@@ -184,8 +184,6 @@ function App() {
 					setRoute={setRoute}
 				/>
 			</div>
-
-			
 		</div>
 	);
 }

@@ -9,6 +9,8 @@ import {
 import { RxCross2 } from "react-icons/rx";
 import { generateDeliveryXML } from "../utils/utils";
 import { importXMLFile } from "../api/Services";
+import { HiOutlinePencil } from "react-icons/hi";
+import { MdOutlineCancel } from "react-icons/md";
 
 const DeliveryPlanner = ({
 	startNewTour,
@@ -20,6 +22,7 @@ const DeliveryPlanner = ({
 	setRoute,
 }) => {
 	const fileInputRef = useRef(null); // Référence pour l'input file
+	const [currentlyEditingTour, setCurrentlyEditingTour] = useState(false);
 
 	// Fonction pour ouvrir la boîte de dialogue fichier
 	const handleImportClick = () => {
@@ -86,6 +89,26 @@ const DeliveryPlanner = ({
 
 	const endTour = () => {
 		finalizeTour();
+	};
+
+	const handleEditTour = (indexTour) => {
+		setCurrentlyEditingTour(true);
+		setCurrentTour(tours[indexTour]);
+		// TODO: Implement editing of tours
+		// setCurrentlyEditingTour(false);
+	};
+
+	const handleDeleteDelivery = (indexReq) => {
+		// TODO: Implement deletion of deliveries
+	};
+
+	const handleAddNewDelivery = () => {
+		// TODO: Implement addition of new deliveries
+	};
+
+	const handleCancelEditing = () => {
+		// TODO: Implement canceling of editing
+		// forget everything we were editing and just close the editing mode
 	};
 
 	return (
@@ -274,8 +297,20 @@ const DeliveryPlanner = ({
 							cursor: "pointer",
 						}}
 					>
-						<div style={{ padding: "0.25rem" }}>
+						<div
+							style={{
+								padding: "0.25rem",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "space-between",
+								gap: "0.5rem",
+							}}
+						>
 							<strong>Tour n° : {indexTour + 1}</strong>
+							<HiOutlinePencil
+								style={{ fontSize: "1.5rem", cursor: "pointer" }}
+								onClick={() => handleEditTour(indexTour)}
+							/>
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaUser size={15} color="#9C27B0" title="Courier" />
@@ -299,6 +334,7 @@ const DeliveryPlanner = ({
 								<li
 									key={indexReq}
 									style={{
+										position: "relative", // Positionnement relatif pour le conteneur
 										borderRadius: "0.75rem",
 										border: "2px solid #000000",
 										padding: "1rem",
@@ -307,6 +343,20 @@ const DeliveryPlanner = ({
 										fontSize: "0.9rem",
 									}}
 								>
+									{currentlyEditingTour && (
+										<MdOutlineCancel
+											onClick={handleDeleteDelivery}
+											style={{
+												position: "absolute",
+												top: "0.5rem",
+												right: "0.5rem",
+												cursor: "pointer",
+												color: "#800020",
+												fontSize: "1.5rem",
+											}}
+											title="Supprimer la livraison"
+										/>
+									)}
 									<div style={{ padding: "0.25rem" }}>
 										<FaTruckPickup size={15} color="#FF9800" title="Pickup" />
 										<strong>Pickup:</strong> ({req.pickup.latitude},{" "}
@@ -324,17 +374,50 @@ const DeliveryPlanner = ({
 								</li>
 							))}
 						</ul>
+
+						{currentlyEditingTour && (
+							<div
+								style={{
+									display: "flex",
+									justifyContent: "center",
+									gap: "1rem",
+									marginTop: "1rem",
+								}}
+							>
+								<button
+									onClick={handleAddNewDelivery}
+									style={{
+										backgroundColor: "#336659",
+										color: "white",
+										padding: "0.3rem 0.8rem",
+										fontSize: "0.9rem",
+										border: "none",
+										borderRadius: "0.5rem",
+										cursor: "pointer",
+									}}
+								>
+									Add Delivery
+								</button>
+								<button
+									onClick={handleCancelEditing}
+									style={{
+										backgroundColor: "#800020",
+										color: "white",
+										padding: "0.3rem 0.8rem",
+										fontSize: "0.9rem",
+										border: "none",
+										borderRadius: "0.5rem",
+										cursor: "pointer",
+									}}
+								>
+									Cancel Editing
+								</button>
+							</div>
+						)}
+
+						{/* Bouton d'export XML */}
 						<button
-							onClick={() => {
-								const xmlContent = generateDeliveryXML(tour);
-								const blob = new Blob([xmlContent], {
-									type: "application/xml",
-								});
-								const link = document.createElement("a");
-								link.href = URL.createObjectURL(blob);
-								link.download = `tour_${indexTour + 1}.xml`;
-								link.click();
-							}}
+							onClick={exportToursToXML}
 							style={{
 								backgroundColor: "#4CAF50",
 								color: "white",
