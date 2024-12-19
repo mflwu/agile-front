@@ -34,6 +34,21 @@ function App() {
 		fetchIntersections();
 	}, []);
 
+	const handleFileUpload = async (event) => {
+		const file = event.target.files[0]; // Récupérer le fichier sélectionné
+		if (!file) return;
+
+		try {
+			const response = await importXMLFile(file); // Envoyer le fichier au back-end
+			console.log("Processed data from XML:", response);
+			// Mettre à jour l'état ou effectuer une action avec les données reçues
+		} catch (error) {
+			console.error("Failed to process XML file:", error);
+		}
+	};
+
+	
+
 	const handleNodeClick = async (node) => {
 		if (!selectionStep) return;
 
@@ -98,6 +113,8 @@ function App() {
 		// Met à jour l'état du tour actuel
 		setCurrentTour(updatedTour);
 	};
+
+	
 
 	const startNewTour = () => {
 		setSelectionStep("courier");
@@ -177,6 +194,7 @@ function App() {
 			<div className="planner-section">
 				<DeliveryPlanner
 					startNewTour={startNewTour}
+					setTours={setTours} // Passez setTours comme prop ici
 					tours={tours}
 					setCurrentTour={setCurrentTour}
 					selectionStep={selectionStep}
