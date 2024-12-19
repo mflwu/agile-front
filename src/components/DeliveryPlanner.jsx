@@ -118,6 +118,50 @@ const DeliveryPlanner = ({
 		});
 	};
 
+	const deleteTourWithFewestRequestsById = (tours, tourId) => {
+		const filteredTours = tours.filter((tour) => tour.id === tourId);
+		
+		if (filteredTours.length <= 1) {
+			// If only one or no tour with the given ID, return tours without changes
+			return tours.filter((tour) => tour.id !== tourId);
+		}
+		
+		// Find the tour with the minimum number of requests
+		const tourToDelete = filteredTours.reduce((minTour, currentTour) => 
+			currentTour.requests.length < minTour.requests.length ? currentTour : minTour
+		);
+	
+		// Return the tours without the tour with fewer requests
+		return tours.filter((tour) => tour !== tourToDelete);
+	};
+
+	const handleAddDelivery = (tourId) => {
+		if (!editedTour || editedTour.id !== tourId) {
+			console.error("No tour is being edited or invalid tour ID.");
+			return;
+		}
+	
+		// Log the edited tour info for debugging
+		console.log("Tour Info:", {
+			id: editedTour.id,
+			courier: editedTour.courier,
+			warehouse: editedTour.warehouse,
+			requests: editedTour.requests.map((req) => ({
+				id: req.id,
+				pickup: req.pickup,
+				delivery: req.delivery,
+			})),
+		});
+	
+		// Set the selection step to "pickup" and assign the current tour to the edited tour
+		setSelectionStep("pickup");
+		setCurrentTour(editedTour);
+		
+	};
+	
+	
+	
+
 	const handleCancelEditing = () => {
 		setEditingTourId(null);
 		setEditedTour(null);
@@ -423,6 +467,39 @@ const DeliveryPlanner = ({
 								</li>
 							))}
 						</ul>
+
+						{editingTourId === tour.id && editedTour && (
+							<div
+								style={{
+									display: "flex",
+									justifyContent: "center",
+									gap: "1rem",
+									marginTop: "1rem",
+								}}
+							>
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										handleAddDelivery(tour.id); // Call the handler to add a delivery
+										const updatedTours = deleteTourWithFewestRequestsById(tours, tour.id);
+										setTours(updatedTours);
+										setEditingTourId(null);
+										setEditedTour(null);
+									}}
+									style={{
+										backgroundColor: "#2196F3",
+										color: "white",
+										padding: "0.3rem 0.8rem",
+										fontSize: "0.9rem",
+										border: "none",
+										borderRadius: "0.5rem",
+										cursor: "pointer",
+									}}
+								>
+									Add Delivery
+								</button>
+							</div>
+						)}
 
 						{editingTourId === tour.id && editedTour && (
 							<div
