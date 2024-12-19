@@ -116,7 +116,7 @@ function App() {
 					warehouse: null,
 					requests: [],
 				});
-				setSelectionStep("warehouse");
+				setSelectionStep(null);
 			}
 		} else {
 			alert(
@@ -128,7 +128,7 @@ function App() {
 				warehouse: null,
 				requests: [],
 			});
-			setSelectionStep("warehouse");
+			setSelectionStep(null);
 		}
 	};
 
