@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DeliveryPlanner from "./components/DeliveryPlanner";
 import PlaceholderMap from "./components/PlaceholderMap";
 import { sendRequestToBackend } from "./api/Services";
+import { fetchIntersections } from "./api/Services";
 
 import "./styles/App.css";
 import "leaflet/dist/leaflet.css";
@@ -18,35 +19,12 @@ function App() {
 	const [route, setRoute] = useState([]);
 
 	useEffect(() => {
-		const fetchIntersections = async () => {
-			try {
-				const response = await fetch("http://localhost:8080/city-map/loadmap");
-				if (!response.ok) {
-					throw new Error("Failed to load city map");
-				}
-				const data = await response.json();
-				setIntersections(data.intersections || []); // Set intersections
-			} catch (error) {
-				console.error("Error fetching city map:", error);
-				setIntersections([]); // Fallback to empty list
-			}
+		const fetchData = async () => {
+			await fetchIntersections(setIntersections);
 		};
 
-		fetchIntersections();
+		fetchData();
 	}, []);
-
-	const handleFileUpload = async (event) => {
-		const file = event.target.files[0]; // Récupérer le fichier sélectionné
-		if (!file) return;
-
-		try {
-			const response = await importXMLFile(file); // Envoyer le fichier au back-end
-			console.log("Processed data from XML:", response);
-			// Mettre à jour l'état ou effectuer une action avec les données reçues
-		} catch (error) {
-			console.error("Failed to process XML file:", error);
-		}
-	};
 
 	const handleNodeClick = async (node) => {
 		if (!selectionStep) return;
