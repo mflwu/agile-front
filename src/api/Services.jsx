@@ -60,3 +60,28 @@ export async function importXMLFile(filePath) {
 		throw error;
 	}
 }
+
+// Récupérer les coursiers
+export async function getCouriers() {
+    try {
+        const response = await apiClient.get(`/data/get/allcourier`);
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching couriers:", error.response?.data || error.message);
+        throw error; 
+    }
+}
+
+export async function importXMLFile(filePath) {
+    try {
+        // Envoie le nom du fichier via une requête GET
+        const response = await apiClient.get(`city-map/import/load-tour-from-xml`, {
+            params: { filePath }, // Ajouter le paramètre filePath dans l'URL
+        });
+        console.log("File successfully sent to backend:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error sending file name:", error.response?.data || error.message);
+        throw error;
+    }
+}
