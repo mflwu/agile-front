@@ -28,6 +28,21 @@ function App() {
 		fetchData();
 	}, []);
 
+	const handleFileUpload = async (event) => {
+		const file = event.target.files[0]; // Récupérer le fichier sélectionné
+		if (!file) return;
+
+		try {
+			const response = await importXMLFile(file); // Envoyer le fichier au back-end
+			console.log("Processed data from XML:", response);
+			// Mettre à jour l'état ou effectuer une action avec les données reçues
+		} catch (error) {
+			console.error("Failed to process XML file:", error);
+		}
+	};
+
+	
+
 	const handleNodeClick = async (node) => {
 		if (!selectionStep) return;
 
@@ -68,6 +83,8 @@ function App() {
 		});
 	};
 
+	
+
 	const startNewTour = () => {
 		setSelectionStep("courier");
 		setCurrentTour({
@@ -90,7 +107,9 @@ function App() {
 					start: currentTour.warehouse.id,
 					pickups: currentTour.requests.map((req) => req.pickup.id),
 					dropoffs: currentTour.requests.map((req) => req.delivery.id),
+					courier: currentTour.courier.id, // Inclure l'ID du livreur
 				};
+				
 				const response = await sendRequestToBackend(payload);
 
 				const parsedRoute = response.map(([lat, lng]) => ({ lat, lng }));
@@ -138,7 +157,7 @@ function App() {
 		setEditingTourId
 	) => {
 		if (!editedTour) return;
-
+	
 		// Vérifiez que la tournée éditée est complète
 		if (
 			editedTour.courier &&
@@ -146,31 +165,41 @@ function App() {
 			editedTour.requests.length > 0 &&
 			editedTour.requests.every((req) => req.pickup && req.delivery)
 		) {
-			// Préparer le payload similaire à finalizeTour
-			const payload = {
-				start: editedTour.warehouse.id,
-				pickups: editedTour.requests.map((req) => req.pickup.id),
-				dropoffs: editedTour.requests.map((req) => req.delivery.id),
-			};
-
-			const response = await sendRequestToBackend(payload);
-
-			const parsedRoute = response.map(([lat, lng]) => ({ lat, lng }));
-
-			const updatedTourWithRoute = { ...editedTour, route: parsedRoute };
-
-			setTours(
-				tours.map((tour) =>
-					tour.id === editedTour.id ? updatedTourWithRoute : tour
-				)
-			);
-
-			setRoute(parsedRoute);
-
-			setEditingTourId(null);
-			setEditedTour(null);
 			try {
+				// Préparer le payload avec le champ `courier`
+				const payload = {
+					start: editedTour.warehouse.id,
+					pickups: editedTour.requests.map((req) => req.pickup.id),
+					dropoffs: editedTour.requests.map((req) => req.delivery.id),
+					courier: editedTour.courier.id, // Assurez-vous que le champ `courier` est inclus
+				};
+	
+				console.log("Payload sent to backend for editing:", payload);
+	
+				// Envoyer la requête au backend
+				const response = await sendRequestToBackend(payload);
+	
+				// Parser la réponse pour extraire la route
+				const parsedRoute = response.map(([lat, lng]) => ({ lat, lng }));
+	
+				// Mettre à jour la tournée avec la nouvelle route
+				const updatedTourWithRoute = { ...editedTour, route: parsedRoute };
+	
+				// Mettre à jour la liste des tournées en remplaçant la tournée éditée
+				setTours(
+					tours.map((tour) =>
+						tour.id === editedTour.id ? updatedTourWithRoute : tour
+					)
+				);
+	
+				// Mettre à jour la route affichée sur la carte
+				setRoute(parsedRoute);
+	
+				// Réinitialiser les états liés à l'édition
+				setEditingTourId(null);
+				setEditedTour(null);
 			} catch (error) {
+				console.error("Error updating the edited tour:", error);
 				alert("The tour update failed. Please try again.");
 			}
 		} else {
@@ -179,6 +208,7 @@ function App() {
 			);
 		}
 	};
+	
 
 	return (
 		<div className="App">
@@ -195,8 +225,8 @@ function App() {
 			<div className="planner-section">
 				<DeliveryPlanner
 					startNewTour={startNewTour}
+					setTours={setTours} // Passez setTours comme prop ici
 					tours={tours}
-					setTours={setTours}
 					setCurrentTour={setCurrentTour}
 					selectionStep={selectionStep}
 					setSelectionStep={setSelectionStep}
