@@ -54,15 +54,6 @@ const DeliveryPlanner = ({
 		setSelectionStep(null); // Reset to show the main sidebar
 	};
 
-	const exportToursToXML = () => {
-		const xmlContent = generateDeliveryXML(tours);
-		const blob = new Blob([xmlContent], { type: "application/xml" });
-		const link = document.createElement("a");
-		link.href = URL.createObjectURL(blob);
-		link.download = "export_tours.xml";
-		link.click();
-	};
-
 	const getStepMessage = () => {
 		if (selectionStep === "courier")
 			return "Please select a courier for the new tour";
@@ -417,7 +408,16 @@ const DeliveryPlanner = ({
 
 						{/* Bouton d'export XML */}
 						<button
-							onClick={exportToursToXML}
+							onClick={() => {
+								const xmlContent = generateDeliveryXML(tour);
+								const blob = new Blob([xmlContent], {
+									type: "application/xml",
+								});
+								const link = document.createElement("a");
+								link.href = URL.createObjectURL(blob);
+								link.download = `tour_${indexTour + 1}.xml`;
+								link.click();
+							}}
 							style={{
 								backgroundColor: "#4CAF50",
 								color: "white",
@@ -428,7 +428,7 @@ const DeliveryPlanner = ({
 								cursor: "pointer",
 								marginTop: "0.5rem",
 								display: "block",
-								margin: "1rem auto", // Centrage horizontal
+								margin: "1rem auto",
 							}}
 						>
 							Export this tour as an XML file
