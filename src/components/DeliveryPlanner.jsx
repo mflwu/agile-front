@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef  } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
 	FaWarehouse,
 	FaTruckPickup,
@@ -10,8 +10,6 @@ import { RxCross2 } from "react-icons/rx";
 import { generateDeliveryXML } from "../utils/utils";
 import { importXMLFile } from "../api/Services";
 
-
-
 const DeliveryPlanner = ({
 	startNewTour,
 	tours,
@@ -19,15 +17,14 @@ const DeliveryPlanner = ({
 	selectionStep,
 	setSelectionStep,
 	finalizeTour,
-	setRoute
+	setRoute,
 }) => {
-
 	const fileInputRef = useRef(null); // Référence pour l'input file
 
-    // Fonction pour ouvrir la boîte de dialogue fichier
-    const handleImportClick = () => {
-        fileInputRef.current.click();
-    };
+	// Fonction pour ouvrir la boîte de dialogue fichier
+	const handleImportClick = () => {
+		fileInputRef.current.click();
+	};
 
 	const [selectedCourier, setSelectedCourier] = useState(null);
 	const couriers = [
@@ -38,8 +35,7 @@ const DeliveryPlanner = ({
 	const handleTourClick = (tour) => {
 		if (tour.route) {
 			console.log("Tour clicked:", tour);
-			setRoute(tour.route); 
-
+			setRoute(tour.route);
 		} else {
 			console.warn("This tour does not have a route.");
 		}
@@ -56,13 +52,13 @@ const DeliveryPlanner = ({
 	};
 
 	const exportToursToXML = () => {
-        const xmlContent = generateDeliveryXML(tours);
-        const blob = new Blob([xmlContent], { type: "application/xml" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "export_tours.xml";
-        link.click();
-    };
+		const xmlContent = generateDeliveryXML(tours);
+		const blob = new Blob([xmlContent], { type: "application/xml" });
+		const link = document.createElement("a");
+		link.href = URL.createObjectURL(blob);
+		link.download = "export_tours.xml";
+		link.click();
+	};
 
 	const getStepMessage = () => {
 		if (selectionStep === "courier")
@@ -119,8 +115,8 @@ const DeliveryPlanner = ({
 					style={{
 						backgroundColor: "#336659",
 						color: "white",
-						padding: "0.5rem 1rem",
-						fontSize: "1rem",
+						padding: "0.5rem 0.5rem",
+						fontSize: "0.875rem",
 						border: "none",
 						borderRadius: "0.5rem",
 						cursor: "pointer",
@@ -140,58 +136,53 @@ const DeliveryPlanner = ({
 
 				{/* Bouton Import XML */}
 				{selectionStep == null && (
-				<button
-					onClick={handleImportClick}
-					style={{
-						backgroundColor: "#2196F3",
-						color: "white",
-						padding: "0.5rem 1rem",
-						fontSize: "1rem",
-						border: "none",
-						borderRadius: "0.5rem",
-						cursor: "pointer",
-					}}
-				>
-					Import XML
-				</button>
+					<button
+						onClick={handleImportClick}
+						style={{
+							backgroundColor: "#2196F3",
+							color: "white",
+							padding: "0.5rem 0.5rem",
+							fontSize: "0.875rem",
+							border: "none",
+							borderRadius: "0.5rem",
+							cursor: "pointer",
+						}}
+					>
+						Import XML
+					</button>
 				)}
-				
 
 				{/* Input File Caché */}
 				<input
-				type="file"
-				accept=".xml"
-				ref={fileInputRef}
-				style={{ display: "none" }}
-				onChange={(e) => {
-					const file = e.target.files[0];
-					if (file) {
-						const fileName = file.name; // Récupère le nom du fichier
-						console.log("Selected file name:", fileName);
+					type="file"
+					accept=".xml"
+					ref={fileInputRef}
+					style={{ display: "none" }}
+					onChange={(e) => {
+						const file = e.target.files[0];
+						if (file) {
+							const fileName = file.name;
+							console.log("Selected file name:", fileName);
 
-						// Envoie le nom du fichier au back-end
-						importXMLFile(fileName)
-							.then((response) => {
-								console.log("File name sent successfully:", response);
-							})
-							.catch((error) => {
-								console.error("Error sending file name:", error);
-							});
-					}
-				}}
-			/>
-
-
-			
+							importXMLFile(fileName)
+								.then((response) => {
+									console.log("File name sent successfully:", response);
+								})
+								.catch((error) => {
+									console.error("Error sending file name:", error);
+								});
+						}
+					}}
+				/>
 
 				{selectionStep == "pickup" && (
 					<button
 						onClick={endTour}
 						style={{
-							backgroundColor: "#800020",
+							backgroundColor: "#f88e55",
 							color: "white",
-							padding: "0.5rem 1rem",
-							fontSize: "1rem",
+							padding: "0.5rem 0.5rem",
+							fontSize: "0.875rem",
 							border: "none",
 							borderRadius: "0.5rem",
 							cursor: "pointer",
@@ -203,7 +194,6 @@ const DeliveryPlanner = ({
 						<RxCross2 />
 						End tour
 					</button>
-					
 				)}
 
 				{selectionStep !== null && (
@@ -212,8 +202,8 @@ const DeliveryPlanner = ({
 						style={{
 							backgroundColor: "#800020",
 							color: "white",
-							padding: "0.5rem 1rem",
-							fontSize: "1rem",
+							padding: "0.5rem 0.5rem",
+							fontSize: "0.875rem",
 							border: "none",
 							borderRadius: "0.5rem",
 							cursor: "pointer",
@@ -272,6 +262,7 @@ const DeliveryPlanner = ({
 					<li
 						key={indexTour}
 						onClick={() => handleTourClick(tour)}
+						className="tour-item"
 						style={{
 							borderRadius: "0.75rem",
 							border: "2px solid #000000",
@@ -279,6 +270,8 @@ const DeliveryPlanner = ({
 							marginBottom: "0.5rem",
 							backgroundColor: "#f9f9f9",
 							fontSize: "0.9rem",
+							transition: "transform 0.2s",
+							cursor: "pointer",
 						}}
 					>
 						<div style={{ padding: "0.25rem" }}>
@@ -331,10 +324,12 @@ const DeliveryPlanner = ({
 								</li>
 							))}
 						</ul>
-												<button
+						<button
 							onClick={() => {
 								const xmlContent = generateDeliveryXML(tour);
-								const blob = new Blob([xmlContent], { type: "application/xml" });
+								const blob = new Blob([xmlContent], {
+									type: "application/xml",
+								});
 								const link = document.createElement("a");
 								link.href = URL.createObjectURL(blob);
 								link.download = `tour_${indexTour + 1}.xml`;
@@ -350,16 +345,14 @@ const DeliveryPlanner = ({
 								cursor: "pointer",
 								marginTop: "0.5rem",
 								display: "block",
-        						margin: "1rem auto", // Centrage horizontal
+								margin: "1rem auto", // Centrage horizontal
 							}}
 						>
 							Export this tour as an XML file
 						</button>
-
 					</li>
 				))}
 			</ul>
-			
 		</div>
 	);
 };
