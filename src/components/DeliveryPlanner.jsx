@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
 	FaWarehouse,
 	FaTruckPickup,
@@ -15,14 +15,17 @@ import { MdOutlineCancel } from "react-icons/md";
 const DeliveryPlanner = ({
 	startNewTour,
 	tours,
+	setTours,
 	setCurrentTour,
 	selectionStep,
 	setSelectionStep,
 	finalizeTour,
+	finalizeEditedTour,
 	setRoute,
 }) => {
 	const fileInputRef = useRef(null); // Référence pour l'input file
-	const [currentlyEditingTour, setCurrentlyEditingTour] = useState(false);
+	const [editingTourId, setEditingTourId] = useState(null);
+	const [editedTour, setEditedTour] = useState(null);
 
 	// Fonction pour ouvrir la boîte de dialogue fichier
 	const handleImportClick = () => {
@@ -47,6 +50,7 @@ const DeliveryPlanner = ({
 	const cancelTour = () => {
 		// Reset the current tour and selection step
 		setCurrentTour({
+			id: null,
 			courier: null,
 			warehouse: null,
 			requests: [],
@@ -74,7 +78,11 @@ const DeliveryPlanner = ({
 
 	const handleCourierSelect = (courier) => {
 		setSelectedCourier(courier);
-		setCurrentTour({ courier, requests: [] });
+		setCurrentTour((prevTour) => ({
+			...prevTour,
+			courier,
+			requests: [], // Si vous souhaitez réinitialiser les requêtes lors de la sélection d'un nouveau courier
+		}));
 		setSelectionStep("warehouse");
 	};
 
@@ -82,24 +90,45 @@ const DeliveryPlanner = ({
 		finalizeTour();
 	};
 
-	const handleEditTour = (indexTour) => {
-		setCurrentlyEditingTour(true);
-		setCurrentTour(tours[indexTour]);
-		// TODO: Implement editing of tours
-		// setCurrentlyEditingTour(false);
+	const handleEditTour = (tourId) => {
+		const tourToEdit = tours.find((tour) => tour.id === tourId);
+		if (tourToEdit) {
+			setEditingTourId(tourId);
+			// Créer une copie profonde de la tournée pour éviter les mutations directes
+			const tourCopy = JSON.parse(JSON.stringify(tourToEdit));
+			setEditedTour(tourCopy);
+		} else {
+			console.error("Tour not found:", tourId);
+		}
 	};
 
-	const handleDeleteDelivery = (indexReq) => {
-		// TODO: Implement deletion of deliveries
-	};
+	const handleDeleteDelivery = (requestId) => {
+		if (!editedTour) return;
 
-	const handleAddNewDelivery = () => {
-		// TODO: Implement addition of new deliveries
+		if (!window.confirm("Are you sure you want to delete this delivery?"))
+			return;
+
+		const updatedRequests = editedTour.requests.filter(
+			(req) => req.id !== requestId
+		);
+
+		setEditedTour({
+			...editedTour,
+			requests: updatedRequests,
+		});
 	};
 
 	const handleCancelEditing = () => {
-		// TODO: Implement canceling of editing
-		// forget everything we were editing and just close the editing mode
+		setEditingTourId(null);
+		setEditedTour(null);
+	};
+
+	const handleValidateEditing = (
+		editedTour,
+		setEditedTour,
+		setEditingTourId
+	) => {
+		finalizeEditedTour(editedTour, setEditedTour, setEditingTourId);
 	};
 
 	return (
@@ -274,7 +303,7 @@ const DeliveryPlanner = ({
 			<ul style={{ listStyleType: "none", padding: 0 }}>
 				{tours.map((tour, indexTour) => (
 					<li
-						key={indexTour}
+						key={tour.id}
 						onClick={() => handleTourClick(tour)}
 						className="tour-item"
 						style={{
@@ -290,19 +319,42 @@ const DeliveryPlanner = ({
 					>
 						<div
 							style={{
-								padding: "0.25rem",
 								display: "flex",
 								alignItems: "center",
 								justifyContent: "space-between",
-								gap: "0.5rem",
+								padding: "0.25rem",
 							}}
 						>
 							<strong>Tour n° : {indexTour + 1}</strong>
-							<HiOutlinePencil
-								style={{ fontSize: "1.5rem", cursor: "pointer" }}
-								onClick={() => handleEditTour(indexTour)}
-							/>
+							<div
+								style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+							>
+								<HiOutlinePencil
+									style={{ fontSize: "1.5rem", cursor: "pointer" }}
+									onClick={(e) => {
+										e.stopPropagation();
+										handleEditTour(tour.id);
+									}}
+								/>
+								{editingTourId === tour.id && editedTour && (
+									<button
+										onClick={handleCancelEditing}
+										style={{
+											backgroundColor: "#800020",
+											color: "white",
+											padding: "0.3rem 0.8rem",
+											fontSize: "0.9rem",
+											border: "none",
+											borderRadius: "0.5rem",
+											cursor: "pointer",
+										}}
+									>
+										Cancel Editing
+									</button>
+								)}
+							</div>
 						</div>
+
 						<div style={{ padding: "0.25rem" }}>
 							<FaUser size={15} color="#9C27B0" title="Courier" />
 							<strong>Courier:</strong> {tour.courier.name}
@@ -321,9 +373,12 @@ const DeliveryPlanner = ({
 								marginTop: "0.5rem",
 							}}
 						>
-							{tour.requests.map((req, indexReq) => (
+							{(editingTourId === tour.id
+								? editedTour.requests
+								: tour.requests
+							).map((req, indexReq) => (
 								<li
-									key={indexReq}
+									key={req.id}
 									style={{
 										position: "relative", // Positionnement relatif pour le conteneur
 										borderRadius: "0.75rem",
@@ -334,9 +389,12 @@ const DeliveryPlanner = ({
 										fontSize: "0.9rem",
 									}}
 								>
-									{currentlyEditingTour && (
+									{editingTourId === tour.id && editedTour && (
 										<MdOutlineCancel
-											onClick={handleDeleteDelivery}
+											onClick={(e) => {
+												e.preventDefault();
+												handleDeleteDelivery(req.id);
+											}}
 											style={{
 												position: "absolute",
 												top: "0.5rem",
@@ -366,7 +424,7 @@ const DeliveryPlanner = ({
 							))}
 						</ul>
 
-						{currentlyEditingTour && (
+						{editingTourId === tour.id && editedTour && (
 							<div
 								style={{
 									display: "flex",
@@ -376,7 +434,14 @@ const DeliveryPlanner = ({
 								}}
 							>
 								<button
-									onClick={handleAddNewDelivery}
+									onClick={(e) => {
+										e.stopPropagation();
+										handleValidateEditing(
+											editedTour,
+											setEditedTour,
+											setEditingTourId
+										);
+									}}
 									style={{
 										backgroundColor: "#336659",
 										color: "white",
@@ -387,21 +452,7 @@ const DeliveryPlanner = ({
 										cursor: "pointer",
 									}}
 								>
-									Add Delivery
-								</button>
-								<button
-									onClick={handleCancelEditing}
-									style={{
-										backgroundColor: "#800020",
-										color: "white",
-										padding: "0.3rem 0.8rem",
-										fontSize: "0.9rem",
-										border: "none",
-										borderRadius: "0.5rem",
-										cursor: "pointer",
-									}}
-								>
-									Cancel Editing
+									Validate Editing
 								</button>
 							</div>
 						)}
@@ -426,9 +477,10 @@ const DeliveryPlanner = ({
 								border: "none",
 								borderRadius: "0.5rem",
 								cursor: "pointer",
-								marginTop: "0.5rem",
 								display: "block",
-								margin: "1rem auto",
+								marginTop: "1rem",
+								marginLeft: "auto",
+								marginRight: "auto",
 							}}
 						>
 							Export this tour as an XML file
