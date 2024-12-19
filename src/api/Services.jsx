@@ -36,14 +36,13 @@ export async function fetchIntersections() {
     }
 }
 
-// Importer un fichier XML pour traitement
-export async function importXMLFile(fileName) {
+export async function importXMLFile(filePath) {
     try {
-        const payload = { filePath: fileName }; // Assure-toi que la clé correspond à ce que le back-end attend
-
-        const response = await apiClient.post(`/import-xml`, payload);
-
-        console.log("File name sent successfully:", response.data);
+        // Envoie le nom du fichier via une requête GET
+        const response = await apiClient.get(`city-map/import-xml`, {
+            params: { filePath }, // Ajouter le paramètre filePath dans l'URL
+        });
+        console.log("File successfully sent to backend:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error sending file name:", error.response?.data || error.message);
