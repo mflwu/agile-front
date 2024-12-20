@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { generateDeliveryXML } from "../utils/utils";
-import { HiOutlinePencil } from "react-icons/hi";
+import { HiOutlinePencil, HiOutlineArrowLeft } from "react-icons/hi";
 import { MdOutlineCancel } from "react-icons/md";
 import { generateUniqueId } from "../utils/utils";
 
@@ -69,6 +69,7 @@ const DeliveryPlanner = ({
 		link.download = "export_tours.xml";
 		link.click();
 	};
+
 
 	const handleImportedTour = async (fileContent) => {
 		try {
@@ -214,6 +215,17 @@ const DeliveryPlanner = ({
 			requests: updatedRequests,
 		});
 	};
+
+	const deleteTourById = (tours, tourId) => {
+		if (!Array.isArray(tours)) {
+			console.error("Expected an array but got:", tours);
+			return [];
+		}
+		// Filter out the tour with the specified ID
+		return tours.filter((tour) => tour.id !== tourId);
+	};
+	
+	
 
 	const deleteTourWithFewestRequestsById = (tours, tourId) => {
 		const filteredTours = tours.filter((tour) => tour.id === tourId);
@@ -533,21 +545,40 @@ const DeliveryPlanner = ({
 									}}
 								/>
 								{editingTourId === tour.id && editedTour && (
-									<button
-										onClick={handleCancelEditing}
-										style={{
-											backgroundColor: "#800020",
-											color: "white",
-											padding: "0.3rem 0.8rem",
-											fontSize: "0.9rem",
-											border: "none",
-											borderRadius: "0.5rem",
-											cursor: "pointer",
+									<HiOutlineArrowLeft
+										onClick={(e) => {
+											e.preventDefault();
+											handleCancelEditing();
 										}}
-									>
-										Cancel Editing
-									</button>
+										style={{
+											top: "0.5rem",
+											right: "0.5rem",
+											cursor: "pointer",
+											color: "#FF9800", // Orange color
+											fontSize: "1.5rem",
+										}}
+										title="Cancel Editing"
+									/>
+									
 								)}
+								{editingTourId === tour.id && editedTour && (
+										<MdOutlineCancel
+											onClick={(e) => {
+												e.preventDefault();
+												setTours(deleteTourById(tour,tour.id));
+												setEditingTourId(null);
+												setEditedTour(null);
+											}}
+											style={{
+												top: "0.5rem",
+												right: "0.5rem",
+												cursor: "pointer",
+												color: "#800020",
+												fontSize: "1.5rem",
+											}}
+											title="Supprimer le tour"
+										/>
+									)}
 							</div>
 						</div>
 
@@ -568,6 +599,8 @@ const DeliveryPlanner = ({
 								paddingLeft: "1rem",
 								marginTop: "0.5rem",
 							}}
+
+							
 						>
 							{(editingTourId === tour.id
 								? editedTour.requests
