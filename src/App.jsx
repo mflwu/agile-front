@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DeliveryPlanner from "./components/DeliveryPlanner";
 import PlaceholderMap from "./components/PlaceholderMap";
-import { sendRequestToBackend } from "./api/Services";
+import { fetchMap, sendRequestToBackend } from "./api/Services";
 import { fetchIntersections } from "./api/Services";
 import { generateUniqueId } from "./utils/utils";
 
@@ -41,7 +41,15 @@ function App() {
 		}
 	};
 
-	
+	const handleFechMap = async (fileContent) => {
+		try {
+			const response = await fetchMap(fileContent);
+			console.log("Processed data from XML:", response);
+			setIntersections(response.intersections || []);
+		} catch (error) {
+			console.error("Failed to process XML file:", error);
+		}
+	};	
 
 	const handleNodeClick = async (node) => {
 		if (!selectionStep) return;
@@ -233,6 +241,7 @@ function App() {
 					finalizeTour={finalizeTour}
 					finalizeEditedTour={finalizeEditedTour}
 					setRoute={setRoute}
+					handleFechMap={handleFechMap}
 				/>
 			</div>
 		</div>

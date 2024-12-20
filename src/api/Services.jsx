@@ -44,6 +44,21 @@ export async function fetchIntersections(setIntersections) {
 	}
 }
 
+//Récupérer la map
+export async function fetchMap(fileContent) {
+    try {
+        const response = await apiClient.post(`/city-map/loadmap-content`, fileContent, {
+            headers: {
+                "Content-Type": "application/xml",
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching map:", error.response?.data || error.message);
+        throw error;
+    }
+}
+
 export async function importXMLFile(filePath) {
 	try {
 		// Envoie le nom du fichier via une requête GET
@@ -87,49 +102,5 @@ export async function uploadXMLContent(xmlContent) {
             error.response?.data || error.message
         );
         throw error;
-    }
-}
-
-
-
-// Récupérer les coursiers
-export async function getCouriers() {
-    try {
-        const response = await apiClient.get(`/data/get/allcourier`);
-        return response.data; 
-    } catch (error) {
-        console.error("Error fetching couriers:", error.response?.data || error.message);
-        throw error; 
-    }
-}
-
-export async function uploadXMLContent(xmlContent) {
-    try {
-        const response = await apiClient.post(`city-map/import/load-tour-from-xml-content`, xmlContent, {
-            headers: {
-                "Content-Type": "application/xml",
-            },
-        });
-        console.log("XML content successfully sent to backend:", response.data);
-        return response.data;
-    } catch (error) {
-        console.error(
-            "Error uploading XML content:",
-            error.response?.data || error.message
-        );
-        throw error;
-    }
-}
-
-
-
-// Récupérer les coursiers
-export async function getCouriers() {
-    try {
-        const response = await apiClient.get(`/data/get/allcourier`);
-        return response.data; 
-    } catch (error) {
-        console.error("Error fetching couriers:", error.response?.data || error.message);
-        throw error; 
     }
 }

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef  } from "react";
-import { getCouriers, uploadXMLContent } from "../api/Services";
+import React, { useState, useEffect, useRef } from "react";
+import { fetchMap, getCouriers, uploadXMLContent } from "../api/Services";
 import { importXMLFile } from "../api/Services";
 import {
 	FaWarehouse,
@@ -25,6 +25,7 @@ const DeliveryPlanner = ({
 	finalizeTour,
 	finalizeEditedTour,
 	setRoute,
+	handleFechMap,
 }) => {
 	const fileInputRef = useRef(null); // Référence pour l'input file
 	const [editingTourId, setEditingTourId] = useState(null);
@@ -73,36 +74,36 @@ const DeliveryPlanner = ({
 		try {
 			// Appeler la fonction pour importer le fichier XML
 			const response = await uploadXMLContent(fileContent);
-	
+
 			console.log("Backend response for imported tour:", response);
-	
+
 			// Extraire les données du backend
 			const { warehouse, pickups, dropoffs, courier, route } = response;
-	
+
 			// Vérifier que les données retournées sont valides
 			if (!warehouse || !pickups || !dropoffs || !route) {
 				throw new Error("Invalid data received from backend for imported tour.");
 			}
-	
+
 			// Formater les données pour qu'elles soient conformes à `PlaceholderMap`
 			const formattedWarehouse = {
 				id: warehouse.id,
 				latitude: warehouse.coordinates[0],
 				longitude: warehouse.coordinates[1],
 			};
-	
+
 			const formattedPickups = pickups.map((pickup) => ({
 				id: pickup.id,
 				latitude: pickup.coordinates[0],
 				longitude: pickup.coordinates[1],
 			}));
-	
+
 			const formattedDropoffs = dropoffs.map((dropoff) => ({
 				id: dropoff.id,
 				latitude: dropoff.coordinates[0],
 				longitude: dropoff.coordinates[1],
 			}));
-	
+
 			const formattedRoute = route.map(([lat, lng]) => ({
 				lat,
 				lng,
@@ -110,13 +111,13 @@ const DeliveryPlanner = ({
 
 			// Définir le coursier par défaut
 			const defaultCourier = { id: 1, name: "Importé par XML" };
-	
+
 			// Si aucun coursier n'est fourni, utilisez le coursier par défaut
 			const formattedCourier = courier
-            ? { id: courier.id, name: courier.name }
-            : defaultCourier;
+				? { id: courier.id, name: courier.name }
+				: defaultCourier;
 
-	
+
 			// Construire un objet de tournée à partir des données formatées
 			const importedTour = {
 				courier: formattedCourier, // Ajouter le coursier
@@ -128,12 +129,12 @@ const DeliveryPlanner = ({
 				})),
 				route: formattedRoute,
 			};
-	
+
 			console.log("Constructed imported tour:", importedTour);
-	
+
 			// Ajouter la tournée importée à la liste des tournées
 			setTours((prevTours) => [...prevTours, importedTour]);
-	
+
 			// Mettre à jour la route pour qu'elle soit affichée sur la carte
 			setRoute(formattedRoute);
 		} catch (error) {
@@ -141,7 +142,7 @@ const DeliveryPlanner = ({
 			alert("An error occurred while importing the tour. Please check the file and try again.");
 		}
 	};
-	
+
 
 	const cancelTour = () => {
 		// Reset the current tour and selection step
@@ -216,17 +217,17 @@ const DeliveryPlanner = ({
 
 	const deleteTourWithFewestRequestsById = (tours, tourId) => {
 		const filteredTours = tours.filter((tour) => tour.id === tourId);
-		
+
 		if (filteredTours.length <= 1) {
 			// If only one or no tour with the given ID, return tours without changes
 			return tours.filter((tour) => tour.id !== tourId);
 		}
-		
+
 		// Find the tour with the minimum number of requests
-		const tourToDelete = filteredTours.reduce((minTour, currentTour) => 
+		const tourToDelete = filteredTours.reduce((minTour, currentTour) =>
 			currentTour.requests.length < minTour.requests.length ? currentTour : minTour
 		);
-	
+
 		// Return the tours without the tour with fewer requests
 		return tours.filter((tour) => tour !== tourToDelete);
 	};
@@ -236,7 +237,7 @@ const DeliveryPlanner = ({
 			console.error("No tour is being edited or invalid tour ID.");
 			return;
 		}
-	
+
 		// Log the edited tour info for debugging
 		console.log("Tour Info:", {
 			id: editedTour.id,
@@ -248,15 +249,15 @@ const DeliveryPlanner = ({
 				delivery: req.delivery,
 			})),
 		});
-	
+
 		// Set the selection step to "pickup" and assign the current tour to the edited tour
 		setSelectionStep("pickup");
 		setCurrentTour(editedTour);
-		
+
 	};
-	
-	
-	
+
+
+
 
 	const handleCancelEditing = () => {
 		setEditingTourId(null);
@@ -334,35 +335,79 @@ const DeliveryPlanner = ({
 						Import XML
 					</button>
 				)}
-
 				{/* Input File Caché */}
 				<input
-    type="file"
-    accept=".xml"
-    ref={fileInputRef}
-    style={{ display: "none" }}
-    onChange={async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            try {
-                // Lire le contenu du fichier comme texte
-                const fileReader = new FileReader();
-                fileReader.onload = async (event) => {
-                    const fileContent = event.target.result;
-                    console.log("File content loaded:", fileContent);
+					type="file"
+					accept=".xml"
+					ref={fileInputRef}
+					style={{ display: "none" }}
+					onChange={async (e) => {
+						const file = e.target.files[0];
+						if (file) {
+							try {
+								// Lire le contenu du fichier comme texte
+								const fileReader = new FileReader();
+								fileReader.onload = async (event) => {
+									const fileContent = event.target.result;
+									console.log("File content loaded:", fileContent);
 
-                    handleImportedTour(fileContent);
-                };
+									handleImportedTour(fileContent);
+								};
 
-                // Lire le fichier comme texte
-                fileReader.readAsText(file);
-            } catch (error) {
-                console.error("Error reading file:", error);
-                alert("Failed to read the file. Please try again.");
-            }
-        }
-    }}
-/>
+								// Lire le fichier comme texte
+								fileReader.readAsText(file);
+							} catch (error) {
+								console.error("Error reading file:", error);
+								alert("Failed to read the file. Please try again.");
+							}
+						}
+					}}
+				/>
+				{/* Bouton Import Map XML */}
+				{selectionStep == null && (
+					<button
+						onClick={handleImportClick}
+						style={{
+							backgroundColor: "#2196F3",
+							color: "white",
+							padding: "0.5rem 0.5rem",
+							fontSize: "0.875rem",
+							border: "none",
+							borderRadius: "0.5rem",
+							cursor: "pointer",
+						}}
+					>
+						Import Map
+					</button>
+				)}
+				{/* Input File Caché */}
+				<input
+					type="file"
+					accept=".xml"
+					ref={fileInputRef}
+					style={{ display: "none" }}
+					onChange={async (e) => {
+						const file = e.target.files[0];
+						if (file) {
+							try {
+								// Lire le contenu du fichier comme texte
+								const fileReader = new FileReader();
+								fileReader.onload = async (event) => {
+									const fileContent = event.target.result;
+									console.log("File content loaded:", fileContent);
+
+									handleFechMap(fileContent);
+								};
+
+								// Lire le fichier comme texte
+								fileReader.readAsText(file);
+							} catch (error) {
+								console.error("Error reading file:", error);
+								alert("Failed to read the file. Please try again.");
+							}
+						}
+					}}
+				/>
 
 
 				{selectionStep == "pickup" && (
@@ -418,33 +463,33 @@ const DeliveryPlanner = ({
 			{/* Sélection du livreur */}
 			{selectionStep === "courier" && (
 				<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-					gap: "0.5rem",
-					marginBottom: "1rem",
-				}}
-			>
-				<h3>Select a Courier:</h3>
-				{couriers.map((courier, index) => (
-					<button
-					key={courier.id}
-					onClick={() => handleCourierSelect(courier)} // Passe l'objet complet
 					style={{
-						padding: "0.5rem 1rem",
-						backgroundColor:
-							selectedCourier?.id === courier.id ? "#4CAF50" : "#f0f0f0",
-						color: selectedCourier?.id === courier.id ? "white" : "black",
-						border: "1px solid #ccc",
-						borderRadius: "0.5rem",
-						cursor: "pointer",
+						display: "flex",
+						flexDirection: "column",
+						gap: "0.5rem",
+						marginBottom: "1rem",
 					}}
 				>
-					{courier.name}
-				</button>
-				))}
+					<h3>Select a Courier:</h3>
+					{couriers.map((courier, index) => (
+						<button
+							key={courier.id}
+							onClick={() => handleCourierSelect(courier)} // Passe l'objet complet
+							style={{
+								padding: "0.5rem 1rem",
+								backgroundColor:
+									selectedCourier?.id === courier.id ? "#4CAF50" : "#f0f0f0",
+								color: selectedCourier?.id === courier.id ? "white" : "black",
+								border: "1px solid #ccc",
+								borderRadius: "0.5rem",
+								cursor: "pointer",
+							}}
+						>
+							{courier.name}
+						</button>
+					))}
 
-			</div>
+				</div>
 
 			)}
 
@@ -506,7 +551,7 @@ const DeliveryPlanner = ({
 
 						<div style={{ padding: "0.25rem" }}>
 							<FaUser size={15} color="#9C27B0" title="Courier" />
-							<strong>Courier:</strong> {tour.courier.name} 
+							<strong>Courier:</strong> {tour.courier.name}
 						</div>
 						<div style={{ padding: "0.25rem" }}>
 							<FaWarehouse size={15} color="#4CAF50" title="Warehouse" />
