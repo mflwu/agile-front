@@ -268,9 +268,6 @@ const DeliveryPlanner = ({
 
 	};
 
-
-
-
 	const handleCancelEditing = () => {
 		setEditingTourId(null);
 		setEditedTour(null);
@@ -316,7 +313,7 @@ const DeliveryPlanner = ({
 						backgroundColor: "#336659",
 						color: "white",
 						padding: "0.5rem 0.5rem",
-						fontSize: "0.875rem",
+						fontSize: "0.750rem",
 						border: "none",
 						borderRadius: "0.5rem",
 						cursor: "pointer",
@@ -343,11 +340,12 @@ const DeliveryPlanner = ({
 								backgroundColor: "#2196F3",
 								color: "white",
 								padding: "0.5rem 0.5rem",
-								fontSize: "0.875rem",
+								fontSize: "0.750rem",
 								border: "none",
 								borderRadius: "0.5rem",
 								cursor: "pointer",
-								marginBottom: "1rem",
+								display: "flex",
+								alignItems: "center",
 							}}
 						>
 							Import XML
@@ -388,10 +386,12 @@ const DeliveryPlanner = ({
 								backgroundColor: "#4CAF50",
 								color: "white",
 								padding: "0.5rem 0.5rem",
-								fontSize: "0.875rem",
+								fontSize: "0.750rem",
 								border: "none",
 								borderRadius: "0.5rem",
 								cursor: "pointer",
+								display: "flex",
+								alignItems: "center",
 							}}
 						>
 							Import Map
@@ -431,7 +431,7 @@ const DeliveryPlanner = ({
 							backgroundColor: "#f88e55",
 							color: "white",
 							padding: "0.5rem 0.5rem",
-							fontSize: "0.875rem",
+							fontSize: "0.750rem",
 							border: "none",
 							borderRadius: "0.5rem",
 							cursor: "pointer",
@@ -452,7 +452,7 @@ const DeliveryPlanner = ({
 							backgroundColor: "#800020",
 							color: "white",
 							padding: "0.5rem 0.5rem",
-							fontSize: "0.875rem",
+							fontSize: "0.750rem",
 							border: "none",
 							borderRadius: "0.5rem",
 							cursor: "pointer",
