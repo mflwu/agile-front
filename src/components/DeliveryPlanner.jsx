@@ -272,6 +272,10 @@ const DeliveryPlanner = ({
 		finalizeEditedTour(editedTour, setEditedTour, setEditingTourId);
 	};
 
+	{/* Références pour les inputs */ }
+	const fileInputRefXML = useRef(null); // Référence pour Import XML
+	const fileInputRefMap = useRef(null); // Référence pour Import Map
+
 	return (
 		<div
 			style={{
@@ -320,94 +324,92 @@ const DeliveryPlanner = ({
 
 				{/* Bouton Import XML */}
 				{selectionStep == null && (
-					<button
-						onClick={handleImportClick}
-						style={{
-							backgroundColor: "#2196F3",
-							color: "white",
-							padding: "0.5rem 0.5rem",
-							fontSize: "0.875rem",
-							border: "none",
-							borderRadius: "0.5rem",
-							cursor: "pointer",
-						}}
-					>
-						Import XML
-					</button>
+					<>
+						<button
+							onClick={() => fileInputRefXML.current.click()} // Appelle la bonne référence
+							style={{
+								backgroundColor: "#2196F3",
+								color: "white",
+								padding: "0.5rem 0.5rem",
+								fontSize: "0.875rem",
+								border: "none",
+								borderRadius: "0.5rem",
+								cursor: "pointer",
+								marginBottom: "1rem",
+							}}
+						>
+							Import XML
+						</button>
+						<input
+							type="file"
+							accept=".xml"
+							ref={fileInputRefXML} // Référence unique pour Import XML
+							style={{ display: "none" }}
+							onChange={async (e) => {
+								const file = e.target.files[0];
+								if (file) {
+									try {
+										const fileReader = new FileReader();
+										fileReader.onload = async (event) => {
+											const fileContent = event.target.result;
+											console.log("XML Content Loaded:", fileContent);
+
+											handleImportedTour(fileContent); // Fonction associée à l'import XML
+										};
+										fileReader.readAsText(file);
+									} catch (error) {
+										console.error("Error reading XML file:", error);
+										alert("Failed to read the XML file. Please try again.");
+									}
+								}
+							}}
+						/>
+					</>
 				)}
-				{/* Input File Caché */}
-				<input
-					type="file"
-					accept=".xml"
-					ref={fileInputRef}
-					style={{ display: "none" }}
-					onChange={async (e) => {
-						const file = e.target.files[0];
-						if (file) {
-							try {
-								// Lire le contenu du fichier comme texte
-								const fileReader = new FileReader();
-								fileReader.onload = async (event) => {
-									const fileContent = event.target.result;
-									console.log("File content loaded:", fileContent);
 
-									handleImportedTour(fileContent);
-								};
-
-								// Lire le fichier comme texte
-								fileReader.readAsText(file);
-							} catch (error) {
-								console.error("Error reading file:", error);
-								alert("Failed to read the file. Please try again.");
-							}
-						}
-					}}
-				/>
 				{/* Bouton Import Map XML */}
 				{selectionStep == null && (
-					<button
-						onClick={handleImportClick}
-						style={{
-							backgroundColor: "#2196F3",
-							color: "white",
-							padding: "0.5rem 0.5rem",
-							fontSize: "0.875rem",
-							border: "none",
-							borderRadius: "0.5rem",
-							cursor: "pointer",
-						}}
-					>
-						Import Map
-					</button>
+					<>
+						<button
+							onClick={() => fileInputRefMap.current.click()} // Appelle la bonne référence
+							style={{
+								backgroundColor: "#4CAF50",
+								color: "white",
+								padding: "0.5rem 0.5rem",
+								fontSize: "0.875rem",
+								border: "none",
+								borderRadius: "0.5rem",
+								cursor: "pointer",
+							}}
+						>
+							Import Map
+						</button>
+						<input
+							type="file"
+							accept=".xml"
+							ref={fileInputRefMap} // Référence unique pour Import Map
+							style={{ display: "none" }}
+							onChange={async (e) => {
+								const file = e.target.files[0];
+								if (file) {
+									try {
+										const fileReader = new FileReader();
+										fileReader.onload = async (event) => {
+											const fileContent = event.target.result;
+											console.log("Map Content Loaded:", fileContent);
+
+											handleFechMap(fileContent); // Fonction associée à l'import Map
+										};
+										fileReader.readAsText(file);
+									} catch (error) {
+										console.error("Error reading Map file:", error);
+										alert("Failed to read the Map file. Please try again.");
+									}
+								}
+							}}
+						/>
+					</>
 				)}
-				{/* Input File Caché */}
-				<input
-					type="file"
-					accept=".xml"
-					ref={fileInputRef}
-					style={{ display: "none" }}
-					onChange={async (e) => {
-						const file = e.target.files[0];
-						if (file) {
-							try {
-								// Lire le contenu du fichier comme texte
-								const fileReader = new FileReader();
-								fileReader.onload = async (event) => {
-									const fileContent = event.target.result;
-									console.log("File content loaded:", fileContent);
-
-									handleFechMap(fileContent);
-								};
-
-								// Lire le fichier comme texte
-								fileReader.readAsText(file);
-							} catch (error) {
-								console.error("Error reading file:", error);
-								alert("Failed to read the file. Please try again.");
-							}
-						}
-					}}
-				/>
 
 
 				{selectionStep == "pickup" && (

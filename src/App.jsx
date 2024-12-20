@@ -44,7 +44,7 @@ function App() {
 	const handleFechMap = async (fileContent) => {
 		try {
 			const response = await fetchMap(fileContent);
-			console.log("Processed data from XML:", response);
+			console.log("Processed map data from XML:", response);
 			setIntersections(response.intersections || []);
 		} catch (error) {
 			console.error("Failed to process XML file:", error);
