@@ -568,6 +568,7 @@ const DeliveryPlanner = ({
 												setTours(deleteTourById(tour,tour.id));
 												setEditingTourId(null);
 												setEditedTour(null);
+												setRoute([]);
 											}}
 											style={{
 												top: "0.5rem",
@@ -670,6 +671,7 @@ const DeliveryPlanner = ({
 										setTours(updatedTours);
 										setEditingTourId(null);
 										setEditedTour(null);
+										
 									}}
 									style={{
 										backgroundColor: "#2196F3",
